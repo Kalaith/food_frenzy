@@ -4,7 +4,6 @@
 
 **Feast Frenzy** is a twisted restaurant simulation game that blends the frantic cooking mechanics of *Overcooked* with a darkly humorous narrative. Manage a bustling restaurant where adorable anthropomorphic animal customers become the very ingredients for your most popular dishes! 
 
-🎮 **[Play the Live Demo](https://your-domain.com)** | 📖 **[Game Design Document](./Feast%20Frenzy_%20A%20Dark%20Comedy%20Co-op%20Restaurant%20Simul.md)**
 
 ## ✨ Features
 
@@ -40,7 +39,7 @@
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/feast-frenzy.git
+git clone https://github.com/Kalaith/food_frenzy.git
 cd feast-frenzy
 
 # Navigate to frontend
