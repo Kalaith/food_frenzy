@@ -209,16 +209,10 @@ export const GAME_BALANCE = {
 - [ ] Seasonal events
 
 
-## 📝 License
+## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
-<div align="center">
+This project is licensed under the MIT License - see the individual component README files for details.
 
 **🍽️ Feast Frenzy - Where Every Customer is a Future Ingredient! 🍽️**
 
-*Made with ❤️ and a touch of dark humor*
-
-</div>
+Part of the WebHatchery game collection.
