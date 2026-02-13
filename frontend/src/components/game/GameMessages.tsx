@@ -1,5 +1,5 @@
-import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface GameMessagesProps {
   messages: string[];
@@ -11,8 +11,9 @@ export const GameMessages: React.FC<GameMessagesProps> = ({ messages }) => {
       {/* Welcome Message */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 shadow-lg">
         <div className="text-blue-800 text-sm leading-relaxed">
-          Welcome to Feast Frenzy! Cook delicious dishes and serve them to customers. 
-          When customers are satisfied and well-fed, they may receive an exclusive VIP dining invitation! ✨
+          Welcome to Feast Frenzy! Cook delicious dishes and serve them to
+          customers. When customers are satisfied and well-fed, they may receive
+          an exclusive VIP dining invitation! ✨
         </div>
       </div>
 
@@ -27,9 +28,7 @@ export const GameMessages: React.FC<GameMessagesProps> = ({ messages }) => {
             transition={{ duration: 0.3 }}
             className="bg-green-50 border border-green-200 rounded-lg p-3 shadow-lg"
           >
-            <div className="text-green-800 text-sm font-medium">
-              {message}
-            </div>
+            <div className="text-green-800 text-sm font-medium">{message}</div>
           </motion.div>
         ))}
       </AnimatePresence>

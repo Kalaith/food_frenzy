@@ -1,7 +1,7 @@
-import { useEffect, useCallback } from 'react';
-import { useGameStore } from '../stores/useGameStore';
-import { gameBalance } from '../constants/gameBalance';
-import type { Customer } from '../types/game';
+import { useEffect, useCallback } from "react";
+import { useGameStore } from "../stores/useGameStore";
+import { gameBalance } from "../constants/gameBalance";
+import type { Customer } from "../types/game";
 
 export const useCustomerSpawning = (showMessage: (message: string) => void) => {
   const { customers, addCustomer, config, customerTypes } = useGameStore();
@@ -9,18 +9,19 @@ export const useCustomerSpawning = (showMessage: (message: string) => void) => {
   const spawnCustomer = useCallback(() => {
     const emptyTableIndex = Array(config.maxCustomers)
       .fill(null)
-      .findIndex((_, index) => !customers.some(c => c.tableIndex === index));
+      .findIndex((_, index) => !customers.some((c) => c.tableIndex === index));
 
     if (emptyTableIndex === -1) return;
 
-    const randomType = customerTypes[Math.floor(Math.random() * customerTypes.length)];
-    
+    const randomType =
+      customerTypes[Math.floor(Math.random() * customerTypes.length)];
+
     // Apply special traits to max satisfaction
     let maxSatisfactionValues: Record<string, number> = {
-      blue: gameBalance.MAX_SATISFACTION_PER_TYPE, 
-      green: gameBalance.MAX_SATISFACTION_PER_TYPE, 
-      yellow: gameBalance.MAX_SATISFACTION_PER_TYPE, 
-      red: gameBalance.MAX_SATISFACTION_PER_TYPE
+      blue: gameBalance.MAX_SATISFACTION_PER_TYPE,
+      green: gameBalance.MAX_SATISFACTION_PER_TYPE,
+      yellow: gameBalance.MAX_SATISFACTION_PER_TYPE,
+      red: gameBalance.MAX_SATISFACTION_PER_TYPE,
     };
 
     // Deer Girl: Low appetite - reduced max satisfaction
@@ -29,7 +30,7 @@ export const useCustomerSpawning = (showMessage: (message: string) => void) => {
         blue: Math.floor(gameBalance.MAX_SATISFACTION_PER_TYPE * 0.7),
         green: Math.floor(gameBalance.MAX_SATISFACTION_PER_TYPE * 0.7),
         yellow: Math.floor(gameBalance.MAX_SATISFACTION_PER_TYPE * 0.7),
-        red: Math.floor(gameBalance.MAX_SATISFACTION_PER_TYPE * 0.7)
+        red: Math.floor(gameBalance.MAX_SATISFACTION_PER_TYPE * 0.7),
       };
     }
 
@@ -39,7 +40,7 @@ export const useCustomerSpawning = (showMessage: (message: string) => void) => {
         blue: Math.floor(gameBalance.MAX_SATISFACTION_PER_TYPE * 1.5),
         green: Math.floor(gameBalance.MAX_SATISFACTION_PER_TYPE * 1.5),
         yellow: Math.floor(gameBalance.MAX_SATISFACTION_PER_TYPE * 1.5),
-        red: Math.floor(gameBalance.MAX_SATISFACTION_PER_TYPE * 1.5)
+        red: Math.floor(gameBalance.MAX_SATISFACTION_PER_TYPE * 1.5),
       };
     }
     const newCustomer: Customer = {
@@ -51,14 +52,14 @@ export const useCustomerSpawning = (showMessage: (message: string) => void) => {
       totalSatisfaction: 0,
       overfed: false,
       isDragging: false,
-      tableIndex: emptyTableIndex
+      tableIndex: emptyTableIndex,
     };
 
     addCustomer(newCustomer);
-    
+
     // Special arrival messages based on traits
     let arrivalMessage = `${newCustomer.type.name} has arrived at table ${emptyTableIndex + 1}!`;
-    
+
     if (randomType.specialTraits?.lowAppetite) {
       arrivalMessage += " 🦌 (She's quite shy and has a small appetite)";
     } else if (randomType.specialTraits?.canWander) {
@@ -76,14 +77,14 @@ export const useCustomerSpawning = (showMessage: (message: string) => void) => {
     } else if (randomType.specialTraits?.throwsFood) {
       arrivalMessage += " 🐒 (Keep her entertained or chaos will ensue!)";
     }
-    
+
     showMessage(arrivalMessage);
   }, [customers, config, customerTypes, addCustomer, showMessage]);
 
   useEffect(() => {
     // Much slower initial spawn using game balance constants
     const spawnTimeouts = gameBalance.INITIAL_SPAWN_DELAYS.map((delay) =>
-      setTimeout(spawnCustomer, delay)
+      setTimeout(spawnCustomer, delay),
     );
 
     // Regular spawning after initial customers

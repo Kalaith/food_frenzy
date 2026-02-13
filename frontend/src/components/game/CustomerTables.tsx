@@ -1,6 +1,6 @@
-import React from 'react';
-import { CustomerCard } from './CustomerCard';
-import type { Customer } from '../../types/game';
+import React from "react";
+import { CustomerCard } from "./CustomerCard";
+import type { Customer } from "../../types/game";
 
 interface CustomerTablesProps {
   customers: Customer[];
@@ -17,7 +17,7 @@ export const CustomerTables: React.FC<CustomerTablesProps> = ({
   onDragStart,
   onDragEnd,
   onDishDrop,
-  onSpecialInvite
+  onSpecialInvite,
 }) => {
   const customerTables = Array(maxCustomers).fill(null);
 
@@ -28,15 +28,16 @@ export const CustomerTables: React.FC<CustomerTablesProps> = ({
       </h3>
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         {customerTables.map((_, index) => {
-          const customer = customers.find(c => c.tableIndex === index);
+          const customer = customers.find((c) => c.tableIndex === index);
           return (
-            <div 
-              key={index} 
+            <div
+              key={index}
               className={`
                 relative min-h-[200px] rounded-lg border-2 border-dashed p-4 transition-all duration-300
-                ${customer 
-                  ? 'border-green-300 bg-green-50' 
-                  : 'border-gray-300 bg-gray-50 hover:border-gray-400'
+                ${
+                  customer
+                    ? "border-green-300 bg-green-50"
+                    : "border-gray-300 bg-gray-50 hover:border-gray-400"
                 }
               `}
             >
@@ -52,7 +53,9 @@ export const CustomerTables: React.FC<CustomerTablesProps> = ({
                 <div className="flex items-center justify-center h-full text-gray-500 text-center">
                   <div>
                     <div className="text-3xl mb-2">🪑</div>
-                    <div className="text-sm font-medium">Waiting for customer...</div>
+                    <div className="text-sm font-medium">
+                      Waiting for customer...
+                    </div>
                   </div>
                 </div>
               )}

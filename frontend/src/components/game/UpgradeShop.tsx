@@ -1,7 +1,7 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { useProgressionStore } from '../../stores/useProgressionStore';
-import type { Upgrade } from '../../types/game';
+import React from "react";
+import { motion } from "framer-motion";
+import { useProgressionStore } from "../../stores/useProgressionStore";
+import type { Upgrade } from "../../types/game";
 
 interface UpgradeShopProps {
   isOpen: boolean;
@@ -19,12 +19,12 @@ const UpgradeShop: React.FC<UpgradeShopProps> = ({ isOpen, onClose }) => {
 
   // Helper function to get upgrade icon based on effects
   const getUpgradeIcon = (upgrade: Upgrade): string => {
-    if (upgrade.effects.customerSpawnRate) return '👥';
-    if (upgrade.effects.satisfactionDecayRate) return '😊';
-    if (upgrade.effects.maxCustomers) return '🏪';
-    if (upgrade.effects.ingredientYield) return '🥕';
-    if (upgrade.effects.cookTime) return '⏱️';
-    return '⭐';
+    if (upgrade.effects.customerSpawnRate) return "👥";
+    if (upgrade.effects.satisfactionDecayRate) return "😊";
+    if (upgrade.effects.maxCustomers) return "🏪";
+    if (upgrade.effects.ingredientYield) return "🥕";
+    if (upgrade.effects.cookTime) return "⏱️";
+    return "⭐";
   };
 
   if (!isOpen) return null;
@@ -62,10 +62,10 @@ const UpgradeShop: React.FC<UpgradeShopProps> = ({ isOpen, onClose }) => {
                 whileHover={{ scale: 1.02 }}
                 className={`border rounded-lg p-4 transition-all ${
                   upgrade.purchased
-                    ? 'bg-green-50 border-green-300'
+                    ? "bg-green-50 border-green-300"
                     : currency >= upgrade.cost
-                    ? 'bg-white border-gray-300 hover:border-blue-400'
-                    : 'bg-gray-50 border-gray-200 opacity-60'
+                      ? "bg-white border-gray-300 hover:border-blue-400"
+                      : "bg-gray-50 border-gray-200 opacity-60"
                 }`}
               >
                 <div className="flex items-start justify-between mb-3">
@@ -78,7 +78,9 @@ const UpgradeShop: React.FC<UpgradeShopProps> = ({ isOpen, onClose }) => {
                 </div>
 
                 <h3 className="font-bold text-lg mb-2">{upgrade.name}</h3>
-                <p className="text-gray-600 text-sm mb-4">{upgrade.description}</p>
+                <p className="text-gray-600 text-sm mb-4">
+                  {upgrade.description}
+                </p>
 
                 <div className="flex items-center justify-between">
                   <div className="text-lg font-bold text-green-600">
@@ -90,20 +92,24 @@ const UpgradeShop: React.FC<UpgradeShopProps> = ({ isOpen, onClose }) => {
                       disabled={currency < upgrade.cost}
                       className={`px-4 py-2 rounded font-medium transition-colors ${
                         currency >= upgrade.cost
-                          ? 'bg-blue-500 text-white hover:bg-blue-600'
-                          : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                          ? "bg-blue-500 text-white hover:bg-blue-600"
+                          : "bg-gray-300 text-gray-500 cursor-not-allowed"
                       }`}
                     >
-                      {currency >= upgrade.cost ? 'Purchase' : 'Not enough $'}
+                      {currency >= upgrade.cost ? "Purchase" : "Not enough $"}
                     </button>
                   )}
                 </div>
 
                 {Object.keys(upgrade.effects).length > 0 && (
                   <div className="mt-3 text-xs text-gray-500">
-                    Effects: {Object.entries(upgrade.effects)
-                      .map(([key, value]) => `${key}: ${value > 0 ? '+' : ''}${value}`)
-                      .join(', ')}
+                    Effects:{" "}
+                    {Object.entries(upgrade.effects)
+                      .map(
+                        ([key, value]) =>
+                          `${key}: ${value > 0 ? "+" : ""}${value}`,
+                      )
+                      .join(", ")}
                   </div>
                 )}
               </motion.div>

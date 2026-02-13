@@ -1,7 +1,12 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-import { gameBalance } from '../constants/gameBalance';
-import type { GameState, Customer, CustomerType, GameConfig } from '../types/game';
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+import { gameBalance } from "../constants/gameBalance";
+import type {
+  GameState,
+  Customer,
+  CustomerType,
+  GameConfig,
+} from "../types/game";
 
 // Game data
 const customerTypes: CustomerType[] = [
@@ -10,67 +15,71 @@ const customerTypes: CustomerType[] = [
     name: "Pig Girl",
     preferredDishes: ["blue", "red"],
     baseDeliciousness: 2,
-    description: "Loves hearty main courses and sweet desserts"
+    description: "Loves hearty main courses and sweet desserts",
   },
   {
     type: "cow",
     name: "Cow Girl",
     preferredDishes: ["green", "yellow"],
     baseDeliciousness: 3,
-    description: "Enjoys soups and substantial meals"
+    description: "Enjoys soups and substantial meals",
   },
   {
     type: "sheep",
     name: "Sheep Girl",
     preferredDishes: ["blue", "green"],
     baseDeliciousness: 2,
-    description: "Prefers light appetizers and warm soups"
+    description: "Prefers light appetizers and warm soups",
   },
   {
     type: "rabbit",
     name: "Rabbit Girl",
     preferredDishes: ["blue", "red"],
     baseDeliciousness: 1,
-    description: "Loves appetizers and desserts"
+    description: "Loves appetizers and desserts",
   },
   {
     type: "cat",
     name: "Cat Girl",
     preferredDishes: ["yellow", "blue"],
     baseDeliciousness: 4,
-    description: "Enjoys main courses and appetizers"
+    description: "Enjoys main courses and appetizers",
   },
   {
     type: "deer",
     name: "Deer Girl",
     preferredDishes: ["green", "blue"],
     baseDeliciousness: 3,
-    description: "🦌 Polite and shy, prefers fresh greens and forest-inspired dishes",
-    specialTraits: { lowAppetite: true }
+    description:
+      "🦌 Polite and shy, prefers fresh greens and forest-inspired dishes",
+    specialTraits: { lowAppetite: true },
   },
   {
     type: "duck",
     name: "Duck Girl",
     preferredDishes: ["yellow", "green"],
     baseDeliciousness: 2,
-    description: "🦆 Quirky and loud, loves bread-based meals and waterfowl-friendly soups",
-    specialTraits: { canWander: true }
+    description:
+      "🦆 Quirky and loud, loves bread-based meals and waterfowl-friendly soups",
+    specialTraits: { canWander: true },
   },
   {
     type: "chicken",
     name: "Chicken Girl",
     preferredDishes: ["yellow", "red"],
     baseDeliciousness: 2,
-    description: "🐔 Nervous and fussy, prefers grain-based meals and fried snacks",
-    specialTraits: { multipliesOnProcess: true }
+    description:
+      "🐔 Nervous and fussy, prefers grain-based meals and fried snacks",
+    specialTraits: { multipliesOnProcess: true },
   },
   {
     type: "fish",
     name: "Fish Girl",
     preferredDishes: ["blue", "green"],
     baseDeliciousness: 4,
-    description: "🐟 Laid-back and cool, enjoys seaweed, sushi, and lighter fare",
-    specialTraits: { fastSpoilage: true }
+    description:
+      "🐟 Laid-back and cool, enjoys seaweed, sushi, and lighter fare",
+    specialTraits: { fastSpoilage: true },
   },
   {
     type: "fox",
@@ -78,7 +87,7 @@ const customerTypes: CustomerType[] = [
     preferredDishes: ["red", "yellow"],
     baseDeliciousness: 3,
     description: "🦊 Cunning and playful, loves spicy dishes and street food",
-    specialTraits: { canStealFood: true }
+    specialTraits: { canStealFood: true },
   },
   {
     type: "goat",
@@ -86,15 +95,16 @@ const customerTypes: CustomerType[] = [
     preferredDishes: ["green", "yellow"],
     baseDeliciousness: 2,
     description: "🐐 Stubborn and quirky, enjoys chewy foods and herbs",
-    specialTraits: { canEatWaste: true }
+    specialTraits: { canEatWaste: true },
   },
   {
     type: "bear",
     name: "Bear Girl",
     preferredDishes: ["red", "yellow"],
     baseDeliciousness: 5,
-    description: "🐻 Big appetite and warm demeanor, loves honey desserts and hearty stews",
-    specialTraits: { highYield: true }
+    description:
+      "🐻 Big appetite and warm demeanor, loves honey desserts and hearty stews",
+    specialTraits: { highYield: true },
   },
   {
     type: "monkey",
@@ -102,8 +112,8 @@ const customerTypes: CustomerType[] = [
     preferredDishes: ["red", "blue"],
     baseDeliciousness: 2,
     description: "🐒 Energetic and cheeky, prefers fruits and finger foods",
-    specialTraits: { throwsFood: true }
-  }
+    specialTraits: { throwsFood: true },
+  },
 ];
 
 const gameConfig: GameConfig = {
@@ -113,7 +123,7 @@ const gameConfig: GameConfig = {
   overfeedThreshold: 1.2,
   maxDeliciousness: 5,
   comboMultiplier: 1.5,
-  specialTableProcessTime: 3000
+  specialTableProcessTime: 3000,
 };
 
 interface GameStore extends GameState {
@@ -153,7 +163,7 @@ const initialState: GameState = {
   specialTableBusy: false,
   chainHistory: [],
   nextCustomerId: 1,
-  dishesReady: {}
+  dishesReady: {},
 };
 
 export const useGameStore = create<GameStore>()(
@@ -163,73 +173,89 @@ export const useGameStore = create<GameStore>()(
       config: gameConfig,
       customerTypes,
 
-      addScore: (points) => set((state) => ({
-        score: state.score + Math.floor(points * (1 + state.combo * 0.1))
-      })),
+      addScore: (points) =>
+        set((state) => ({
+          score: state.score + Math.floor(points * (1 + state.combo * 0.1)),
+        })),
 
       addCombo: () => set((state) => ({ combo: state.combo + 1 })),
 
       resetCombo: () => set({ combo: 0 }),
 
-      addToChain: (customerId) => set((state) => ({
-        chainHistory: [...state.chainHistory, customerId],
-        chain: state.chainHistory.length + 1
-      })),
+      addToChain: (customerId) =>
+        set((state) => ({
+          chainHistory: [...state.chainHistory, customerId],
+          chain: state.chainHistory.length + 1,
+        })),
 
-      addCustomer: (customer) => set((state) => ({
-        customers: [...state.customers, customer]
-      })),
+      addCustomer: (customer) =>
+        set((state) => ({
+          customers: [...state.customers, customer],
+        })),
 
-      removeCustomer: (customerId) => set((state) => ({
-        customers: state.customers.filter(c => c.id !== customerId)
-      })),
+      removeCustomer: (customerId) =>
+        set((state) => ({
+          customers: state.customers.filter((c) => c.id !== customerId),
+        })),
 
-      updateCustomer: (customerId, updates) => set((state) => ({
-        customers: state.customers.map(c =>
-          c.id === customerId ? { ...c, ...updates } : c
-        )
-      })),
+      updateCustomer: (customerId, updates) =>
+        set((state) => ({
+          customers: state.customers.map((c) =>
+            c.id === customerId ? { ...c, ...updates } : c,
+          ),
+        })),
 
       setSpecialTableBusy: (busy) => set({ specialTableBusy: busy }),
 
-      updateIngredients: (newIngredients) => set((state) => ({
-        ingredients: { ...state.ingredients, ...newIngredients }
-      })),
+      updateIngredients: (newIngredients) =>
+        set((state) => ({
+          ingredients: { ...state.ingredients, ...newIngredients },
+        })),
 
       resetGame: () => set(initialState),
 
       // Dish management
-      addDish: (stationColor, dishName) => set((state) => ({
-        dishesReady: {
-          ...state.dishesReady,
-          [stationColor]: [...(state.dishesReady[stationColor] || []), dishName]
-        }
-      })),
+      addDish: (stationColor, dishName) =>
+        set((state) => ({
+          dishesReady: {
+            ...state.dishesReady,
+            [stationColor]: [
+              ...(state.dishesReady[stationColor] || []),
+              dishName,
+            ],
+          },
+        })),
 
-      removeDish: (stationColor, dishIndex) => set((state) => ({
-        dishesReady: {
-          ...state.dishesReady,
-          [stationColor]: (state.dishesReady[stationColor] || []).filter((_, i) => i !== dishIndex)
-        }
-      })),
+      removeDish: (stationColor, dishIndex) =>
+        set((state) => ({
+          dishesReady: {
+            ...state.dishesReady,
+            [stationColor]: (state.dishesReady[stationColor] || []).filter(
+              (_, i) => i !== dishIndex,
+            ),
+          },
+        })),
 
-      getDishesForStation: (stationColor) => get().dishesReady[stationColor] || [],
+      getDishesForStation: (stationColor) =>
+        get().dishesReady[stationColor] || [],
 
-      getCustomerById: (id) => get().customers.find(c => c.id === id),
+      getCustomerById: (id) => get().customers.find((c) => c.id === id),
 
       canProcessCustomer: (customer) => {
-        return customer.deliciousness >= gameBalance.VIP_DELICIOUSNESS_THRESHOLD && 
-               customer.totalSatisfaction > gameBalance.VIP_SATISFACTION_THRESHOLD;
-      }
+        return (
+          customer.deliciousness >= gameBalance.VIP_DELICIOUSNESS_THRESHOLD &&
+          customer.totalSatisfaction > gameBalance.VIP_SATISFACTION_THRESHOLD
+        );
+      },
     }),
     {
-      name: 'feast-frenzy-game',
+      name: "feast-frenzy-game",
       partialize: (state) => ({
         score: state.score,
         ingredients: state.ingredients,
         nextCustomerId: state.nextCustomerId,
-        dishesReady: state.dishesReady
-      })
-    }
-  )
+        dishesReady: state.dishesReady,
+      }),
+    },
+  ),
 );

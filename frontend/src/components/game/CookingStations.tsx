@@ -1,37 +1,39 @@
-import React from 'react';
-import { CookingStation } from './CookingStation';
-import type { DishType } from '../../types/game';
+import React from "react";
+import { CookingStation } from "./CookingStation";
+import type { DishType } from "../../types/game";
 
 interface CookingStationsProps {
   onDishReady: (dishName: string) => void;
 }
 
-export const CookingStations: React.FC<CookingStationsProps> = ({ onDishReady }) => {
+export const CookingStations: React.FC<CookingStationsProps> = ({
+  onDishReady,
+}) => {
   const dishTypes: DishType[] = [
     {
       color: "blue",
       name: "Appetizers",
       cookTime: 3000,
-      examples: ["Spring Rolls", "Cheese Bites", "Mini Salads"]
+      examples: ["Spring Rolls", "Cheese Bites", "Mini Salads"],
     },
     {
       color: "green",
       name: "Soups",
       cookTime: 5000,
-      examples: ["Vegetable Soup", "Bone Broth", "Mushroom Bisque"]
+      examples: ["Vegetable Soup", "Bone Broth", "Mushroom Bisque"],
     },
     {
       color: "yellow",
       name: "Main Courses",
       cookTime: 7000,
-      examples: ["Grilled Steaks", "Roasted Chicken", "Pasta Dishes"]
+      examples: ["Grilled Steaks", "Roasted Chicken", "Pasta Dishes"],
     },
     {
       color: "red",
       name: "Desserts",
       cookTime: 4000,
-      examples: ["Chocolate Cake", "Ice Cream", "Fruit Tarts"]
-    }
+      examples: ["Chocolate Cake", "Ice Cream", "Fruit Tarts"],
+    },
   ];
 
   return (

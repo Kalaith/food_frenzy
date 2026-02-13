@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { useGameStore } from '../../stores/useGameStore';
-import type { DishType } from '../../types/game';
+import React, { useState } from "react";
+import { motion } from "framer-motion";
+import { useGameStore } from "../../stores/useGameStore";
+import type { DishType } from "../../types/game";
 
 interface CookingStationProps {
   color: string;
@@ -12,12 +12,16 @@ interface CookingStationProps {
 export const CookingStation: React.FC<CookingStationProps> = ({
   color,
   dishType,
-  onDishReady
+  onDishReady,
 }) => {
-  const { addDish, removeDish: removeFromStore, getDishesForStation } = useGameStore();
+  const {
+    addDish,
+    removeDish: removeFromStore,
+    getDishesForStation,
+  } = useGameStore();
   const [isCooking, setIsCooking] = useState(false);
   const [timeLeft, setTimeLeft] = useState(0);
-  
+
   const dishes = getDishesForStation(color);
 
   const startCooking = () => {
@@ -40,7 +44,8 @@ export const CookingStation: React.FC<CookingStationProps> = ({
 
   const finishCooking = () => {
     setIsCooking(false);
-    const randomDish = dishType.examples[Math.floor(Math.random() * dishType.examples.length)];
+    const randomDish =
+      dishType.examples[Math.floor(Math.random() * dishType.examples.length)];
     addDish(color, randomDish);
     onDishReady(color, randomDish);
   };
@@ -52,25 +57,23 @@ export const CookingStation: React.FC<CookingStationProps> = ({
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
   return (
     <motion.div
-      className={`cooking-station ${color}-station ${isCooking ? 'cooking' : ''}`}
+      className={`cooking-station ${color}-station ${isCooking ? "cooking" : ""}`}
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
     >
       <div className="station-header">
         <h4>{dishType.name}</h4>
         <div className="cook-timer">
-          {isCooking ? formatTime(timeLeft) : ''}
+          {isCooking ? formatTime(timeLeft) : ""}
         </div>
       </div>
 
-      <div className="station-status">
-        {isCooking ? 'Cooking...' : 'Ready'}
-      </div>
+      <div className="station-status">{isCooking ? "Cooking..." : "Ready"}</div>
 
       <div className="dishes-ready">
         {dishes.map((dish, index) => (
@@ -79,7 +82,10 @@ export const CookingStation: React.FC<CookingStationProps> = ({
             className={`dish ${color}`}
             draggable
             onDragStart={(e: React.DragEvent) => {
-              e.dataTransfer.setData('dish', JSON.stringify({ color, name: dish, index }));
+              e.dataTransfer.setData(
+                "dish",
+                JSON.stringify({ color, name: dish, index }),
+              );
             }}
             onDragEnd={() => {
               // Remove dish after successful drag
@@ -87,7 +93,7 @@ export const CookingStation: React.FC<CookingStationProps> = ({
             }}
             onDoubleClick={() => handleRemoveDish(index)}
             title={`Drag ${dish} to a customer`}
-            style={{ cursor: 'grab' }}
+            style={{ cursor: "grab" }}
           >
             {dish}
           </div>
@@ -95,10 +101,7 @@ export const CookingStation: React.FC<CookingStationProps> = ({
       </div>
 
       {!isCooking && (
-        <button
-          className="cook-button"
-          onClick={startCooking}
-        >
+        <button className="cook-button" onClick={startCooking}>
           Cook {dishType.name}
         </button>
       )}

@@ -1,20 +1,25 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { useProgressionStore } from '../../stores/useProgressionStore';
+import React from "react";
+import { motion } from "framer-motion";
+import { useProgressionStore } from "../../stores/useProgressionStore";
 
 interface AchievementDisplayProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-const AchievementDisplay: React.FC<AchievementDisplayProps> = ({ isOpen, onClose }) => {
+const AchievementDisplay: React.FC<AchievementDisplayProps> = ({
+  isOpen,
+  onClose,
+}) => {
   const { achievements } = useProgressionStore();
 
-  const unlockedAchievements = achievements.filter(a => a.unlocked);
-  const lockedAchievements = achievements.filter(a => !a.unlocked);
+  const unlockedAchievements = achievements.filter((a) => a.unlocked);
+  const lockedAchievements = achievements.filter((a) => !a.unlocked);
 
   // Calculate completion percentage
-  const completionPercentage = Math.round((unlockedAchievements.length / achievements.length) * 100);
+  const completionPercentage = Math.round(
+    (unlockedAchievements.length / achievements.length) * 100,
+  );
 
   if (!isOpen) return null;
 
@@ -38,7 +43,8 @@ const AchievementDisplay: React.FC<AchievementDisplayProps> = ({ isOpen, onClose
             <div>
               <h2 className="text-2xl font-bold">Achievements</h2>
               <p className="text-sm opacity-90 mt-1">
-                {unlockedAchievements.length} of {achievements.length} unlocked ({completionPercentage}%)
+                {unlockedAchievements.length} of {achievements.length} unlocked
+                ({completionPercentage}%)
               </p>
             </div>
             <div className="text-right">
@@ -76,15 +82,21 @@ const AchievementDisplay: React.FC<AchievementDisplayProps> = ({ isOpen, onClose
                     <div className="flex items-start justify-between mb-3">
                       <div className="text-2xl">🏆</div>
                       <div className="text-right">
-                        <div className="text-sm text-green-600 font-medium">Completed</div>
+                        <div className="text-sm text-green-600 font-medium">
+                          Completed
+                        </div>
                         <div className="text-lg font-bold text-green-600">
                           +${achievement.reward}
                         </div>
                       </div>
                     </div>
 
-                    <h4 className="font-bold text-lg mb-2">{achievement.name}</h4>
-                    <p className="text-gray-700 text-sm">{achievement.description}</p>
+                    <h4 className="font-bold text-lg mb-2">
+                      {achievement.name}
+                    </h4>
+                    <p className="text-gray-700 text-sm">
+                      {achievement.description}
+                    </p>
                   </motion.div>
                 ))}
               </div>
@@ -115,20 +127,26 @@ const AchievementDisplay: React.FC<AchievementDisplayProps> = ({ isOpen, onClose
                       </div>
                     </div>
 
-                    <h4 className="font-bold text-lg mb-2 text-gray-600">{achievement.name}</h4>
-                    <p className="text-gray-500 text-sm mb-3">{achievement.description}</p>
+                    <h4 className="font-bold text-lg mb-2 text-gray-600">
+                      {achievement.name}
+                    </h4>
+                    <p className="text-gray-500 text-sm mb-3">
+                      {achievement.description}
+                    </p>
 
                     {/* Progress Bar */}
                     <div className="mb-2">
                       <div className="flex justify-between text-xs text-gray-500 mb-1">
                         <span>Progress</span>
-                        <span>{achievement.progress} / {achievement.maxProgress}</span>
+                        <span>
+                          {achievement.progress} / {achievement.maxProgress}
+                        </span>
                       </div>
                       <div className="bg-gray-200 rounded-full h-2 overflow-hidden">
                         <motion.div
                           initial={{ width: 0 }}
                           animate={{
-                            width: `${Math.min((achievement.progress / achievement.maxProgress) * 100, 100)}%`
+                            width: `${Math.min((achievement.progress / achievement.maxProgress) * 100, 100)}%`,
                           }}
                           transition={{ duration: 0.5 }}
                           className="h-full bg-blue-500 rounded-full"

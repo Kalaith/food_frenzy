@@ -1,8 +1,8 @@
-import React from 'react';
-import { CustomerTables } from './CustomerTables';
-import { CookingStations } from './CookingStations';
-import { SpecialTable } from './SpecialTable';
-import type { Customer } from '../../types/game';
+import React from "react";
+import { CustomerTables } from "./CustomerTables";
+import { CookingStations } from "./CookingStations";
+import { SpecialTable } from "./SpecialTable";
+import type { Customer } from "../../types/game";
 
 interface RestaurantAreaProps {
   customers: Customer[];
@@ -23,7 +23,7 @@ export const RestaurantArea: React.FC<RestaurantAreaProps> = ({
   onDishDrop,
   onSpecialInvite,
   onDishReady,
-  onCustomerDrop
+  onCustomerDrop,
 }) => {
   return (
     <div className="space-y-6">
