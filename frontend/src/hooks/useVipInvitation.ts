@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useGameStore } from '../stores/useGameStore';
-import { GAME_BALANCE } from '../constants/gameBalance';
+import { gameBalance } from '../constants/gameBalance';
 import type { Customer } from '../types/game';
 
 export const useVipInvitation = (showMessage: (message: string) => void) => {
@@ -24,7 +24,7 @@ export const useVipInvitation = (showMessage: (message: string) => void) => {
     if (willAccept) {
       removeCustomer(invitedCustomer.id);
       addCombo();
-      const points = GAME_BALANCE.VIP_POINTS_PER_DELICIOUSNESS * invitedCustomer.deliciousness;
+      const points = gameBalance.VIP_POINTS_PER_DELICIOUSNESS * invitedCustomer.deliciousness;
       addScore(points);
       showMessage(`${invitedCustomer.type.name} accepted the VIP invitation! Gained ${points} points!`);
     } else {

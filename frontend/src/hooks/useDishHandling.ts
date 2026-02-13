@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { useGameStore } from '../stores/useGameStore';
-import { GAME_BALANCE } from '../constants/gameBalance';
+import { gameBalance } from '../constants/gameBalance';
 
 export const useDishHandling = (showMessage: (message: string) => void) => {
   const { customers, updateCustomer, addScore, canProcessCustomer } = useGameStore();
@@ -14,11 +14,11 @@ export const useDishHandling = (showMessage: (message: string) => void) => {
     if (!customer) return;
 
     const isPreferred = customer.type.preferredDishes.includes(dishColor);
-    let satisfactionGain: number = GAME_BALANCE.BASE_SATISFACTION_GAIN;
+    let satisfactionGain: number = gameBalance.BASE_SATISFACTION_GAIN;
     let deliciousnessGain = 0;
 
     if (isPreferred) {
-      satisfactionGain = GAME_BALANCE.PREFERRED_SATISFACTION_GAIN;
+      satisfactionGain = gameBalance.PREFERRED_SATISFACTION_GAIN;
       deliciousnessGain = 1;
       showMessage(`${customer.type.name} loves ${dishName}! +${satisfactionGain} satisfaction!`);
     } else {
@@ -48,7 +48,7 @@ export const useDishHandling = (showMessage: (message: string) => void) => {
     });
 
     // Score points using game balance
-    addScore(satisfactionGain * (isPreferred ? GAME_BALANCE.PREFERRED_DISH_SCORE_MULTIPLIER : GAME_BALANCE.BASE_SCORE_MULTIPLIER));
+    addScore(satisfactionGain * (isPreferred ? gameBalance.PREFERRED_DISH_SCORE_MULTIPLIER : gameBalance.BASE_SCORE_MULTIPLIER));
 
     if (canProcessCustomer({ ...customer, deliciousness: newDeliciousness, totalSatisfaction: newTotalSatisfaction })) {
       showMessage(`${customer.type.name} is ready for the Special Table! 🔪`);

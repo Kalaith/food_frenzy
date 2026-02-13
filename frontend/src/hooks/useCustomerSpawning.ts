@@ -1,6 +1,6 @@
 import { useEffect, useCallback } from 'react';
 import { useGameStore } from '../stores/useGameStore';
-import { GAME_BALANCE } from '../constants/gameBalance';
+import { gameBalance } from '../constants/gameBalance';
 import type { Customer } from '../types/game';
 
 export const useCustomerSpawning = (showMessage: (message: string) => void) => {
@@ -17,29 +17,29 @@ export const useCustomerSpawning = (showMessage: (message: string) => void) => {
     
     // Apply special traits to max satisfaction
     let maxSatisfactionValues: Record<string, number> = {
-      blue: GAME_BALANCE.MAX_SATISFACTION_PER_TYPE, 
-      green: GAME_BALANCE.MAX_SATISFACTION_PER_TYPE, 
-      yellow: GAME_BALANCE.MAX_SATISFACTION_PER_TYPE, 
-      red: GAME_BALANCE.MAX_SATISFACTION_PER_TYPE
+      blue: gameBalance.MAX_SATISFACTION_PER_TYPE, 
+      green: gameBalance.MAX_SATISFACTION_PER_TYPE, 
+      yellow: gameBalance.MAX_SATISFACTION_PER_TYPE, 
+      red: gameBalance.MAX_SATISFACTION_PER_TYPE
     };
 
     // Deer Girl: Low appetite - reduced max satisfaction
     if (randomType.specialTraits?.lowAppetite) {
       maxSatisfactionValues = {
-        blue: Math.floor(GAME_BALANCE.MAX_SATISFACTION_PER_TYPE * 0.7),
-        green: Math.floor(GAME_BALANCE.MAX_SATISFACTION_PER_TYPE * 0.7),
-        yellow: Math.floor(GAME_BALANCE.MAX_SATISFACTION_PER_TYPE * 0.7),
-        red: Math.floor(GAME_BALANCE.MAX_SATISFACTION_PER_TYPE * 0.7)
+        blue: Math.floor(gameBalance.MAX_SATISFACTION_PER_TYPE * 0.7),
+        green: Math.floor(gameBalance.MAX_SATISFACTION_PER_TYPE * 0.7),
+        yellow: Math.floor(gameBalance.MAX_SATISFACTION_PER_TYPE * 0.7),
+        red: Math.floor(gameBalance.MAX_SATISFACTION_PER_TYPE * 0.7)
       };
     }
 
     // Bear Girl: High appetite - increased max satisfaction
     if (randomType.specialTraits?.highYield) {
       maxSatisfactionValues = {
-        blue: Math.floor(GAME_BALANCE.MAX_SATISFACTION_PER_TYPE * 1.5),
-        green: Math.floor(GAME_BALANCE.MAX_SATISFACTION_PER_TYPE * 1.5),
-        yellow: Math.floor(GAME_BALANCE.MAX_SATISFACTION_PER_TYPE * 1.5),
-        red: Math.floor(GAME_BALANCE.MAX_SATISFACTION_PER_TYPE * 1.5)
+        blue: Math.floor(gameBalance.MAX_SATISFACTION_PER_TYPE * 1.5),
+        green: Math.floor(gameBalance.MAX_SATISFACTION_PER_TYPE * 1.5),
+        yellow: Math.floor(gameBalance.MAX_SATISFACTION_PER_TYPE * 1.5),
+        red: Math.floor(gameBalance.MAX_SATISFACTION_PER_TYPE * 1.5)
       };
     }
     const newCustomer: Customer = {
@@ -82,7 +82,7 @@ export const useCustomerSpawning = (showMessage: (message: string) => void) => {
 
   useEffect(() => {
     // Much slower initial spawn using game balance constants
-    const spawnTimeouts = GAME_BALANCE.INITIAL_SPAWN_DELAYS.map((delay) =>
+    const spawnTimeouts = gameBalance.INITIAL_SPAWN_DELAYS.map((delay) =>
       setTimeout(spawnCustomer, delay)
     );
 

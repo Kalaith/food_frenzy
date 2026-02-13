@@ -1,5 +1,5 @@
 // Game Balance Constants - Easy to tweak for difficulty
-export const GAME_BALANCE = {
+export const gameBalance = {
   // Customer Spawning
   CUSTOMER_SPAWN_INTERVAL: 20000, // 20 seconds between new customers
   INITIAL_SPAWN_DELAYS: [5000, 15000], // First customers at 5s and 15s
@@ -25,8 +25,8 @@ export const GAME_BALANCE = {
 
 // Helper function to calculate total max satisfaction
 export const getTotalMaxSatisfaction = () => 
-  GAME_BALANCE.MAX_SATISFACTION_PER_TYPE * 4; // 4 dish types
+  gameBalance.MAX_SATISFACTION_PER_TYPE * 4; // 4 dish types
 
 // Helper function to get VIP threshold as percentage
 export const getVipThresholdPercentage = () => 
-  (GAME_BALANCE.VIP_SATISFACTION_THRESHOLD / getTotalMaxSatisfaction()) * 100;
+  (gameBalance.VIP_SATISFACTION_THRESHOLD / getTotalMaxSatisfaction()) * 100;

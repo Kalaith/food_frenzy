@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { GAME_BALANCE } from '../constants/gameBalance';
+import { gameBalance } from '../constants/gameBalance';
 import type { GameState, Customer, CustomerType, GameConfig } from '../types/game';
 
 // Game data
@@ -107,8 +107,8 @@ const customerTypes: CustomerType[] = [
 ];
 
 const gameConfig: GameConfig = {
-  maxCustomers: GAME_BALANCE.MAX_CUSTOMERS,
-  customerSpawnTime: GAME_BALANCE.CUSTOMER_SPAWN_INTERVAL,
+  maxCustomers: gameBalance.MAX_CUSTOMERS,
+  customerSpawnTime: gameBalance.CUSTOMER_SPAWN_INTERVAL,
   satisfactionDecayRate: 0.5,
   overfeedThreshold: 1.2,
   maxDeliciousness: 5,
@@ -218,8 +218,8 @@ export const useGameStore = create<GameStore>()(
       getCustomerById: (id) => get().customers.find(c => c.id === id),
 
       canProcessCustomer: (customer) => {
-        return customer.deliciousness >= GAME_BALANCE.VIP_DELICIOUSNESS_THRESHOLD && 
-               customer.totalSatisfaction > GAME_BALANCE.VIP_SATISFACTION_THRESHOLD;
+        return customer.deliciousness >= gameBalance.VIP_DELICIOUSNESS_THRESHOLD && 
+               customer.totalSatisfaction > gameBalance.VIP_SATISFACTION_THRESHOLD;
       }
     }),
     {

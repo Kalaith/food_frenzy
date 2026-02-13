@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { GAME_BALANCE } from '../../constants/gameBalance';
+import { gameBalance } from '../../constants/gameBalance';
 import type { Customer } from '../../types/game';
 
 interface CustomerCardProps {
@@ -45,8 +45,8 @@ export const CustomerCard: React.FC<CustomerCardProps> = ({
   const totalSatisfaction = Object.values(customer.satisfaction).reduce((sum, val) => sum + val, 0);
   const totalMax = Object.values(customer.maxSatisfaction).reduce((sum, val) => sum + val, 0);
   const fillPercentage = Math.min(100, (totalSatisfaction / totalMax) * 100);
-  const canBeProcessed = customer.deliciousness >= GAME_BALANCE.VIP_DELICIOUSNESS_THRESHOLD && 
-                        totalSatisfaction > GAME_BALANCE.VIP_SATISFACTION_THRESHOLD;
+  const canBeProcessed = customer.deliciousness >= gameBalance.VIP_DELICIOUSNESS_THRESHOLD && 
+                        totalSatisfaction > gameBalance.VIP_SATISFACTION_THRESHOLD;
 
   const getCustomerBgColor = () => {
     switch (customer.type.type) {
