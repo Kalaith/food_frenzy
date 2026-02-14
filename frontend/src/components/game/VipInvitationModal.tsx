@@ -1,6 +1,6 @@
-import React from "react";
-import { motion } from "framer-motion";
-import type { Customer } from "../../types/game";
+import React from 'react';
+import { motion } from 'framer-motion';
+import type { Customer } from '../../types/game';
 
 interface VipInvitationModalProps {
   customer: Customer | null;
@@ -47,26 +47,24 @@ export const VipInvitationModal: React.FC<VipInvitationModalProps> = ({
             <div
               className={`
               inline-flex items-center justify-center w-20 h-20 rounded-full text-4xl mb-3
-              ${customer.type.type === "pig" ? "bg-pink-100" : ""}
-              ${customer.type.type === "cow" ? "bg-yellow-100" : ""}
-              ${customer.type.type === "sheep" ? "bg-gray-100" : ""}
-              ${customer.type.type === "rabbit" ? "bg-green-100" : ""}
-              ${customer.type.type === "cat" ? "bg-orange-100" : ""}
-              ${customer.type.type === "deer" ? "bg-emerald-100" : ""}
-              ${customer.type.type === "duck" ? "bg-cyan-100" : ""}
-              ${customer.type.type === "chicken" ? "bg-amber-100" : ""}
-              ${customer.type.type === "fish" ? "bg-blue-100" : ""}
-              ${customer.type.type === "fox" ? "bg-red-100" : ""}
-              ${customer.type.type === "goat" ? "bg-lime-100" : ""}
-              ${customer.type.type === "bear" ? "bg-amber-100" : ""}
-              ${customer.type.type === "monkey" ? "bg-yellow-100" : ""}
+              ${customer.type.type === 'pig' ? 'bg-pink-100' : ''}
+              ${customer.type.type === 'cow' ? 'bg-yellow-100' : ''}
+              ${customer.type.type === 'sheep' ? 'bg-gray-100' : ''}
+              ${customer.type.type === 'rabbit' ? 'bg-green-100' : ''}
+              ${customer.type.type === 'cat' ? 'bg-orange-100' : ''}
+              ${customer.type.type === 'deer' ? 'bg-emerald-100' : ''}
+              ${customer.type.type === 'duck' ? 'bg-cyan-100' : ''}
+              ${customer.type.type === 'chicken' ? 'bg-amber-100' : ''}
+              ${customer.type.type === 'fish' ? 'bg-blue-100' : ''}
+              ${customer.type.type === 'fox' ? 'bg-red-100' : ''}
+              ${customer.type.type === 'goat' ? 'bg-lime-100' : ''}
+              ${customer.type.type === 'bear' ? 'bg-amber-100' : ''}
+              ${customer.type.type === 'monkey' ? 'bg-yellow-100' : ''}
             `}
             >
               😊
             </div>
-            <h3 className="text-xl font-semibold text-gray-800">
-              {customer.type.name}
-            </h3>
+            <h3 className="text-xl font-semibold text-gray-800">{customer.type.name}</h3>
           </div>
 
           {/* Invitation Text */}
@@ -75,9 +73,8 @@ export const VipInvitationModal: React.FC<VipInvitationModalProps> = ({
               Dear <span className="font-semibold">{customer.type.name}</span>,
             </p>
             <p>
-              We are delighted to invite you to our exclusive VIP dining
-              experience! You have been selected for your exceptional appetite
-              and refined taste.
+              We are delighted to invite you to our exclusive VIP dining experience! You have been
+              selected for your exceptional appetite and refined taste.
             </p>
             <p className="font-medium text-purple-700">
               Would you like to accept this special invitation?

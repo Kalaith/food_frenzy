@@ -1,117 +1,107 @@
-import { create } from "zustand";
-import { persist } from "zustand/middleware";
-import { gameBalance } from "../constants/gameBalance";
-import type {
-  GameState,
-  Customer,
-  CustomerType,
-  GameConfig,
-} from "../types/game";
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
+import { gameBalance } from '../constants/gameBalance';
+import type { GameState, Customer, CustomerType, GameConfig } from '../types/game';
 
 // Game data
 const customerTypes: CustomerType[] = [
   {
-    type: "pig",
-    name: "Pig Girl",
-    preferredDishes: ["blue", "red"],
+    type: 'pig',
+    name: 'Pig Girl',
+    preferredDishes: ['blue', 'red'],
     baseDeliciousness: 2,
-    description: "Loves hearty main courses and sweet desserts",
+    description: 'Loves hearty main courses and sweet desserts',
   },
   {
-    type: "cow",
-    name: "Cow Girl",
-    preferredDishes: ["green", "yellow"],
+    type: 'cow',
+    name: 'Cow Girl',
+    preferredDishes: ['green', 'yellow'],
     baseDeliciousness: 3,
-    description: "Enjoys soups and substantial meals",
+    description: 'Enjoys soups and substantial meals',
   },
   {
-    type: "sheep",
-    name: "Sheep Girl",
-    preferredDishes: ["blue", "green"],
+    type: 'sheep',
+    name: 'Sheep Girl',
+    preferredDishes: ['blue', 'green'],
     baseDeliciousness: 2,
-    description: "Prefers light appetizers and warm soups",
+    description: 'Prefers light appetizers and warm soups',
   },
   {
-    type: "rabbit",
-    name: "Rabbit Girl",
-    preferredDishes: ["blue", "red"],
+    type: 'rabbit',
+    name: 'Rabbit Girl',
+    preferredDishes: ['blue', 'red'],
     baseDeliciousness: 1,
-    description: "Loves appetizers and desserts",
+    description: 'Loves appetizers and desserts',
   },
   {
-    type: "cat",
-    name: "Cat Girl",
-    preferredDishes: ["yellow", "blue"],
+    type: 'cat',
+    name: 'Cat Girl',
+    preferredDishes: ['yellow', 'blue'],
     baseDeliciousness: 4,
-    description: "Enjoys main courses and appetizers",
+    description: 'Enjoys main courses and appetizers',
   },
   {
-    type: "deer",
-    name: "Deer Girl",
-    preferredDishes: ["green", "blue"],
+    type: 'deer',
+    name: 'Deer Girl',
+    preferredDishes: ['green', 'blue'],
     baseDeliciousness: 3,
-    description:
-      "🦌 Polite and shy, prefers fresh greens and forest-inspired dishes",
+    description: '🦌 Polite and shy, prefers fresh greens and forest-inspired dishes',
     specialTraits: { lowAppetite: true },
   },
   {
-    type: "duck",
-    name: "Duck Girl",
-    preferredDishes: ["yellow", "green"],
+    type: 'duck',
+    name: 'Duck Girl',
+    preferredDishes: ['yellow', 'green'],
     baseDeliciousness: 2,
-    description:
-      "🦆 Quirky and loud, loves bread-based meals and waterfowl-friendly soups",
+    description: '🦆 Quirky and loud, loves bread-based meals and waterfowl-friendly soups',
     specialTraits: { canWander: true },
   },
   {
-    type: "chicken",
-    name: "Chicken Girl",
-    preferredDishes: ["yellow", "red"],
+    type: 'chicken',
+    name: 'Chicken Girl',
+    preferredDishes: ['yellow', 'red'],
     baseDeliciousness: 2,
-    description:
-      "🐔 Nervous and fussy, prefers grain-based meals and fried snacks",
+    description: '🐔 Nervous and fussy, prefers grain-based meals and fried snacks',
     specialTraits: { multipliesOnProcess: true },
   },
   {
-    type: "fish",
-    name: "Fish Girl",
-    preferredDishes: ["blue", "green"],
+    type: 'fish',
+    name: 'Fish Girl',
+    preferredDishes: ['blue', 'green'],
     baseDeliciousness: 4,
-    description:
-      "🐟 Laid-back and cool, enjoys seaweed, sushi, and lighter fare",
+    description: '🐟 Laid-back and cool, enjoys seaweed, sushi, and lighter fare',
     specialTraits: { fastSpoilage: true },
   },
   {
-    type: "fox",
-    name: "Fox Girl",
-    preferredDishes: ["red", "yellow"],
+    type: 'fox',
+    name: 'Fox Girl',
+    preferredDishes: ['red', 'yellow'],
     baseDeliciousness: 3,
-    description: "🦊 Cunning and playful, loves spicy dishes and street food",
+    description: '🦊 Cunning and playful, loves spicy dishes and street food',
     specialTraits: { canStealFood: true },
   },
   {
-    type: "goat",
-    name: "Goat Girl",
-    preferredDishes: ["green", "yellow"],
+    type: 'goat',
+    name: 'Goat Girl',
+    preferredDishes: ['green', 'yellow'],
     baseDeliciousness: 2,
-    description: "🐐 Stubborn and quirky, enjoys chewy foods and herbs",
+    description: '🐐 Stubborn and quirky, enjoys chewy foods and herbs',
     specialTraits: { canEatWaste: true },
   },
   {
-    type: "bear",
-    name: "Bear Girl",
-    preferredDishes: ["red", "yellow"],
+    type: 'bear',
+    name: 'Bear Girl',
+    preferredDishes: ['red', 'yellow'],
     baseDeliciousness: 5,
-    description:
-      "🐻 Big appetite and warm demeanor, loves honey desserts and hearty stews",
+    description: '🐻 Big appetite and warm demeanor, loves honey desserts and hearty stews',
     specialTraits: { highYield: true },
   },
   {
-    type: "monkey",
-    name: "Monkey Girl",
-    preferredDishes: ["red", "blue"],
+    type: 'monkey',
+    name: 'Monkey Girl',
+    preferredDishes: ['red', 'blue'],
     baseDeliciousness: 2,
-    description: "🐒 Energetic and cheeky, prefers fruits and finger foods",
+    description: '🐒 Energetic and cheeky, prefers fruits and finger foods',
     specialTraits: { throwsFood: true },
   },
 ];
@@ -173,42 +163,40 @@ export const useGameStore = create<GameStore>()(
       config: gameConfig,
       customerTypes,
 
-      addScore: (points) =>
-        set((state) => ({
+      addScore: points =>
+        set(state => ({
           score: state.score + Math.floor(points * (1 + state.combo * 0.1)),
         })),
 
-      addCombo: () => set((state) => ({ combo: state.combo + 1 })),
+      addCombo: () => set(state => ({ combo: state.combo + 1 })),
 
       resetCombo: () => set({ combo: 0 }),
 
-      addToChain: (customerId) =>
-        set((state) => ({
+      addToChain: customerId =>
+        set(state => ({
           chainHistory: [...state.chainHistory, customerId],
           chain: state.chainHistory.length + 1,
         })),
 
-      addCustomer: (customer) =>
-        set((state) => ({
+      addCustomer: customer =>
+        set(state => ({
           customers: [...state.customers, customer],
         })),
 
-      removeCustomer: (customerId) =>
-        set((state) => ({
-          customers: state.customers.filter((c) => c.id !== customerId),
+      removeCustomer: customerId =>
+        set(state => ({
+          customers: state.customers.filter(c => c.id !== customerId),
         })),
 
       updateCustomer: (customerId, updates) =>
-        set((state) => ({
-          customers: state.customers.map((c) =>
-            c.id === customerId ? { ...c, ...updates } : c,
-          ),
+        set(state => ({
+          customers: state.customers.map(c => (c.id === customerId ? { ...c, ...updates } : c)),
         })),
 
-      setSpecialTableBusy: (busy) => set({ specialTableBusy: busy }),
+      setSpecialTableBusy: busy => set({ specialTableBusy: busy }),
 
-      updateIngredients: (newIngredients) =>
-        set((state) => ({
+      updateIngredients: newIngredients =>
+        set(state => ({
           ingredients: { ...state.ingredients, ...newIngredients },
         })),
 
@@ -216,32 +204,28 @@ export const useGameStore = create<GameStore>()(
 
       // Dish management
       addDish: (stationColor, dishName) =>
-        set((state) => ({
+        set(state => ({
           dishesReady: {
             ...state.dishesReady,
-            [stationColor]: [
-              ...(state.dishesReady[stationColor] || []),
-              dishName,
-            ],
+            [stationColor]: [...(state.dishesReady[stationColor] || []), dishName],
           },
         })),
 
       removeDish: (stationColor, dishIndex) =>
-        set((state) => ({
+        set(state => ({
           dishesReady: {
             ...state.dishesReady,
             [stationColor]: (state.dishesReady[stationColor] || []).filter(
-              (_, i) => i !== dishIndex,
+              (_, i) => i !== dishIndex
             ),
           },
         })),
 
-      getDishesForStation: (stationColor) =>
-        get().dishesReady[stationColor] || [],
+      getDishesForStation: stationColor => get().dishesReady[stationColor] || [],
 
-      getCustomerById: (id) => get().customers.find((c) => c.id === id),
+      getCustomerById: id => get().customers.find(c => c.id === id),
 
-      canProcessCustomer: (customer) => {
+      canProcessCustomer: customer => {
         return (
           customer.deliciousness >= gameBalance.VIP_DELICIOUSNESS_THRESHOLD &&
           customer.totalSatisfaction > gameBalance.VIP_SATISFACTION_THRESHOLD
@@ -249,13 +233,13 @@ export const useGameStore = create<GameStore>()(
       },
     }),
     {
-      name: "feast-frenzy-game",
-      partialize: (state) => ({
+      name: 'feast-frenzy-game',
+      partialize: state => ({
         score: state.score,
         ingredients: state.ingredients,
         nextCustomerId: state.nextCustomerId,
         dishesReady: state.dishesReady,
       }),
-    },
-  ),
+    }
+  )
 );

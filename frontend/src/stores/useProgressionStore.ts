@@ -1,41 +1,36 @@
-import { create } from "zustand";
-import { persist } from "zustand/middleware";
-import type {
-  MetaProgression,
-  Upgrade,
-  Recipe,
-  Achievement,
-} from "../types/game";
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
+import type { MetaProgression, Upgrade, Recipe, Achievement } from '../types/game';
 
 const initialUpgrades: Upgrade[] = [
   {
-    id: "cooking-speed",
-    name: "Faster Cooking",
-    description: "Reduce cooking time by 20%",
+    id: 'cooking-speed',
+    name: 'Faster Cooking',
+    description: 'Reduce cooking time by 20%',
     cost: 100,
     purchased: false,
     effects: { cookTimeMultiplier: 0.8 },
   },
   {
-    id: "customer-patience",
-    name: "Patient Customers",
-    description: "Customers wait 50% longer before leaving",
+    id: 'customer-patience',
+    name: 'Patient Customers',
+    description: 'Customers wait 50% longer before leaving',
     cost: 150,
     purchased: false,
     effects: { patienceMultiplier: 1.5 },
   },
   {
-    id: "processing-efficiency",
-    name: "Better Processing",
-    description: "Get 25% more meat from processing",
+    id: 'processing-efficiency',
+    name: 'Better Processing',
+    description: 'Get 25% more meat from processing',
     cost: 200,
     purchased: false,
     effects: { meatYieldMultiplier: 1.25 },
   },
   {
-    id: "combo-boost",
-    name: "Combo Master",
-    description: "Higher combo multipliers",
+    id: 'combo-boost',
+    name: 'Combo Master',
+    description: 'Higher combo multipliers',
     cost: 250,
     purchased: false,
     effects: { comboMultiplier: 1.3 },
@@ -44,46 +39,46 @@ const initialUpgrades: Upgrade[] = [
 
 const initialRecipes: Recipe[] = [
   {
-    id: "bacon-ramen",
-    name: "Bacon Ramen",
-    description: "Premium ramen made from Pig Girl meat",
-    ingredients: { "pig-meat": 2 },
-    customerType: "pig",
+    id: 'bacon-ramen',
+    name: 'Bacon Ramen',
+    description: 'Premium ramen made from Pig Girl meat',
+    ingredients: { 'pig-meat': 2 },
+    customerType: 'pig',
     unlocked: false,
-    unlockCondition: "Process 5 Pig Girls",
+    unlockCondition: 'Process 5 Pig Girls',
     profitMultiplier: 2.0,
   },
   {
-    id: "rainbow-stew",
-    name: "Rainbow Stew",
-    description: "Legendary stew from all animal types",
+    id: 'rainbow-stew',
+    name: 'Rainbow Stew',
+    description: 'Legendary stew from all animal types',
     ingredients: {
-      "pig-meat": 1,
-      "cow-meat": 1,
-      "sheep-meat": 1,
-      "rabbit-meat": 1,
-      "cat-meat": 1,
+      'pig-meat': 1,
+      'cow-meat': 1,
+      'sheep-meat': 1,
+      'rabbit-meat': 1,
+      'cat-meat': 1,
     },
     unlocked: false,
-    unlockCondition: "Process one of each animal type in a chain",
+    unlockCondition: 'Process one of each animal type in a chain',
     profitMultiplier: 5.0,
   },
 ];
 
 const initialAchievements: Achievement[] = [
   {
-    id: "first-customer",
-    name: "First Customer",
-    description: "Process your first customer",
+    id: 'first-customer',
+    name: 'First Customer',
+    description: 'Process your first customer',
     unlocked: false,
     progress: 0,
     maxProgress: 1,
     reward: 50,
   },
   {
-    id: "combo-master",
-    name: "Combo Master",
-    description: "Achieve a 10-customer combo chain",
+    id: 'combo-master',
+    name: 'Combo Master',
+    description: 'Achieve a 10-customer combo chain',
     unlocked: false,
     progress: 0,
     maxProgress: 10,
@@ -122,12 +117,12 @@ export const useProgressionStore = create<ProgressionStore>()(
     (set, get) => ({
       ...initialState,
 
-      addCurrency: (amount) =>
-        set((state) => ({
+      addCurrency: amount =>
+        set(state => ({
           currency: state.currency + amount,
         })),
 
-      spendCurrency: (amount) => {
+      spendCurrency: amount => {
         const state = get();
         if (state.currency >= amount) {
           set({ currency: state.currency - amount });
@@ -136,39 +131,35 @@ export const useProgressionStore = create<ProgressionStore>()(
         return false;
       },
 
-      purchaseUpgrade: (upgradeId) => {
+      purchaseUpgrade: upgradeId => {
         const state = get();
-        const upgrade = state.upgrades.find((u) => u.id === upgradeId);
+        const upgrade = state.upgrades.find(u => u.id === upgradeId);
         if (!upgrade || upgrade.purchased || !state.canAfford(upgrade.cost)) {
           return false;
         }
 
         set({
-          upgrades: state.upgrades.map((u) =>
-            u.id === upgradeId ? { ...u, purchased: true } : u,
-          ),
+          upgrades: state.upgrades.map(u => (u.id === upgradeId ? { ...u, purchased: true } : u)),
         });
         state.spendCurrency(upgrade.cost);
         return true;
       },
 
-      unlockRecipe: (recipeId) =>
-        set((state) => ({
-          recipes: state.recipes.map((r) =>
-            r.id === recipeId ? { ...r, unlocked: true } : r,
-          ),
+      unlockRecipe: recipeId =>
+        set(state => ({
+          recipes: state.recipes.map(r => (r.id === recipeId ? { ...r, unlocked: true } : r)),
         })),
 
       updateAchievement: (achievementId, progress) =>
-        set((state) => ({
-          achievements: state.achievements.map((a) =>
+        set(state => ({
+          achievements: state.achievements.map(a =>
             a.id === achievementId
               ? {
                   ...a,
                   progress: Math.min(progress, a.maxProgress),
                   unlocked: progress >= a.maxProgress,
                 }
-              : a,
+              : a
           ),
         })),
 
@@ -186,14 +177,14 @@ export const useProgressionStore = create<ProgressionStore>()(
 
       resetProgress: () => set(initialState),
 
-      getUpgrade: (id) => get().upgrades.find((u) => u.id === id),
-      getRecipe: (id) => get().recipes.find((r) => r.id === id),
-      getAchievement: (id) => get().achievements.find((a) => a.id === id),
-      canAfford: (cost) => get().currency >= cost,
+      getUpgrade: id => get().upgrades.find(u => u.id === id),
+      getRecipe: id => get().recipes.find(r => r.id === id),
+      getAchievement: id => get().achievements.find(a => a.id === id),
+      canAfford: cost => get().currency >= cost,
     }),
     {
-      name: "feast-frenzy-progression",
-      partialize: (state) => ({
+      name: 'feast-frenzy-progression',
+      partialize: state => ({
         currency: state.currency,
         upgrades: state.upgrades,
         recipes: state.recipes,
@@ -201,6 +192,6 @@ export const useProgressionStore = create<ProgressionStore>()(
         prestigeLevel: state.prestigeLevel,
         totalScore: state.totalScore,
       }),
-    },
-  ),
+    }
+  )
 );

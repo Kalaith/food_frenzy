@@ -1,36 +1,27 @@
-import React, { useState } from "react";
-import { motion } from "framer-motion";
-import { useProgressionStore } from "../../stores/useProgressionStore";
-import UpgradeShop from "./UpgradeShop";
-import RecipeMenu from "./RecipeMenu";
-import AchievementDisplay from "./AchievementDisplay";
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
+import { useProgressionStore } from '../../stores/useProgressionStore';
+import UpgradeShop from './UpgradeShop';
+import RecipeMenu from './RecipeMenu';
+import AchievementDisplay from './AchievementDisplay';
 
 interface ProgressionPanelProps {
   isOpen: boolean;
   onToggle: () => void;
 }
 
-const ProgressionPanel: React.FC<ProgressionPanelProps> = ({
-  isOpen,
-  onToggle,
-}) => {
-  const {
-    currency,
-    prestigeLevel,
-    totalScore,
-    upgrades,
-    recipes,
-    achievements,
-  } = useProgressionStore();
-  const [activeModal, setActiveModal] = useState<
-    "upgrades" | "recipes" | "achievements" | null
-  >(null);
+const ProgressionPanel: React.FC<ProgressionPanelProps> = ({ isOpen, onToggle }) => {
+  const { currency, prestigeLevel, totalScore, upgrades, recipes, achievements } =
+    useProgressionStore();
+  const [activeModal, setActiveModal] = useState<'upgrades' | 'recipes' | 'achievements' | null>(
+    null
+  );
 
-  const purchasedUpgrades = upgrades.filter((u) => u.purchased).length;
-  const unlockedRecipes = recipes.filter((r) => r.unlocked).length;
-  const unlockedAchievements = achievements.filter((a) => a.unlocked).length;
+  const purchasedUpgrades = upgrades.filter(u => u.purchased).length;
+  const unlockedRecipes = recipes.filter(r => r.unlocked).length;
+  const unlockedAchievements = achievements.filter(a => a.unlocked).length;
 
-  const openModal = (modal: "upgrades" | "recipes" | "achievements") => {
+  const openModal = (modal: 'upgrades' | 'recipes' | 'achievements') => {
     setActiveModal(modal);
   };
 
@@ -53,19 +44,16 @@ const ProgressionPanel: React.FC<ProgressionPanelProps> = ({
 
       {/* Progression Panel */}
       <motion.div
-        initial={{ x: "100%" }}
-        animate={{ x: isOpen ? 0 : "100%" }}
-        transition={{ type: "tween", duration: 0.3 }}
+        initial={{ x: '100%' }}
+        animate={{ x: isOpen ? 0 : '100%' }}
+        transition={{ type: 'tween', duration: 0.3 }}
         className="fixed top-0 right-0 h-full w-80 bg-white shadow-2xl z-30 border-l border-gray-200"
       >
         <div className="p-6">
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold text-gray-800">Progression</h2>
-            <button
-              onClick={onToggle}
-              className="text-gray-500 hover:text-gray-700 text-xl"
-            >
+            <button onClick={onToggle} className="text-gray-500 hover:text-gray-700 text-xl">
               ✕
             </button>
           </div>
@@ -91,7 +79,7 @@ const ProgressionPanel: React.FC<ProgressionPanelProps> = ({
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              onClick={() => openModal("upgrades")}
+              onClick={() => openModal('upgrades')}
               className="w-full bg-gradient-to-r from-purple-500 to-purple-600 text-white p-4 rounded-lg hover:from-purple-600 hover:to-purple-700 transition-all shadow-md"
             >
               <div className="flex items-center justify-between">
@@ -109,7 +97,7 @@ const ProgressionPanel: React.FC<ProgressionPanelProps> = ({
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              onClick={() => openModal("recipes")}
+              onClick={() => openModal('recipes')}
               className="w-full bg-gradient-to-r from-green-500 to-green-600 text-white p-4 rounded-lg hover:from-green-600 hover:to-green-700 transition-all shadow-md"
             >
               <div className="flex items-center justify-between">
@@ -127,7 +115,7 @@ const ProgressionPanel: React.FC<ProgressionPanelProps> = ({
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              onClick={() => openModal("achievements")}
+              onClick={() => openModal('achievements')}
               className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 text-white p-4 rounded-lg hover:from-yellow-600 hover:to-orange-600 transition-all shadow-md"
             >
               <div className="flex items-center justify-between">
@@ -162,13 +150,9 @@ const ProgressionPanel: React.FC<ProgressionPanelProps> = ({
                 <span className="text-gray-600">Completion:</span>
                 <span className="font-medium">
                   {Math.round(
-                    ((purchasedUpgrades +
-                      unlockedRecipes +
-                      unlockedAchievements) /
-                      (upgrades.length +
-                        recipes.length +
-                        achievements.length)) *
-                      100,
+                    ((purchasedUpgrades + unlockedRecipes + unlockedAchievements) /
+                      (upgrades.length + recipes.length + achievements.length)) *
+                      100
                   )}
                   %
                 </span>
@@ -179,12 +163,9 @@ const ProgressionPanel: React.FC<ProgressionPanelProps> = ({
       </motion.div>
 
       {/* Modals */}
-      <UpgradeShop isOpen={activeModal === "upgrades"} onClose={closeModal} />
-      <RecipeMenu isOpen={activeModal === "recipes"} onClose={closeModal} />
-      <AchievementDisplay
-        isOpen={activeModal === "achievements"}
-        onClose={closeModal}
-      />
+      <UpgradeShop isOpen={activeModal === 'upgrades'} onClose={closeModal} />
+      <RecipeMenu isOpen={activeModal === 'recipes'} onClose={closeModal} />
+      <AchievementDisplay isOpen={activeModal === 'achievements'} onClose={closeModal} />
     </>
   );
 };

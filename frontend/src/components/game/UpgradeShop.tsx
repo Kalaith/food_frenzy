@@ -1,7 +1,7 @@
-import React from "react";
-import { motion } from "framer-motion";
-import { useProgressionStore } from "../../stores/useProgressionStore";
-import type { Upgrade } from "../../types/game";
+import React from 'react';
+import { motion } from 'framer-motion';
+import { useProgressionStore } from '../../stores/useProgressionStore';
+import type { Upgrade } from '../../types/game';
 
 interface UpgradeShopProps {
   isOpen: boolean;
@@ -19,12 +19,12 @@ const UpgradeShop: React.FC<UpgradeShopProps> = ({ isOpen, onClose }) => {
 
   // Helper function to get upgrade icon based on effects
   const getUpgradeIcon = (upgrade: Upgrade): string => {
-    if (upgrade.effects.customerSpawnRate) return "👥";
-    if (upgrade.effects.satisfactionDecayRate) return "😊";
-    if (upgrade.effects.maxCustomers) return "🏪";
-    if (upgrade.effects.ingredientYield) return "🥕";
-    if (upgrade.effects.cookTime) return "⏱️";
-    return "⭐";
+    if (upgrade.effects.customerSpawnRate) return '👥';
+    if (upgrade.effects.satisfactionDecayRate) return '😊';
+    if (upgrade.effects.maxCustomers) return '🏪';
+    if (upgrade.effects.ingredientYield) return '🥕';
+    if (upgrade.effects.cookTime) return '⏱️';
+    return '⭐';
   };
 
   if (!isOpen) return null;
@@ -42,7 +42,7 @@ const UpgradeShop: React.FC<UpgradeShopProps> = ({ isOpen, onClose }) => {
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.8, opacity: 0 }}
         className="bg-white rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[80vh] overflow-hidden"
-        onClick={(e) => e.stopPropagation()}
+        onClick={e => e.stopPropagation()}
       >
         <div className="bg-gradient-to-r from-purple-600 to-blue-600 text-white p-6">
           <div className="flex justify-between items-center">
@@ -56,16 +56,16 @@ const UpgradeShop: React.FC<UpgradeShopProps> = ({ isOpen, onClose }) => {
 
         <div className="p-6 overflow-y-auto max-h-[60vh]">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {upgrades.map((upgrade) => (
+            {upgrades.map(upgrade => (
               <motion.div
                 key={upgrade.id}
                 whileHover={{ scale: 1.02 }}
                 className={`border rounded-lg p-4 transition-all ${
                   upgrade.purchased
-                    ? "bg-green-50 border-green-300"
+                    ? 'bg-green-50 border-green-300'
                     : currency >= upgrade.cost
-                      ? "bg-white border-gray-300 hover:border-blue-400"
-                      : "bg-gray-50 border-gray-200 opacity-60"
+                      ? 'bg-white border-gray-300 hover:border-blue-400'
+                      : 'bg-gray-50 border-gray-200 opacity-60'
                 }`}
               >
                 <div className="flex items-start justify-between mb-3">
@@ -78,38 +78,31 @@ const UpgradeShop: React.FC<UpgradeShopProps> = ({ isOpen, onClose }) => {
                 </div>
 
                 <h3 className="font-bold text-lg mb-2">{upgrade.name}</h3>
-                <p className="text-gray-600 text-sm mb-4">
-                  {upgrade.description}
-                </p>
+                <p className="text-gray-600 text-sm mb-4">{upgrade.description}</p>
 
                 <div className="flex items-center justify-between">
-                  <div className="text-lg font-bold text-green-600">
-                    ${upgrade.cost}
-                  </div>
+                  <div className="text-lg font-bold text-green-600">${upgrade.cost}</div>
                   {!upgrade.purchased && (
                     <button
                       onClick={() => handlePurchase(upgrade)}
                       disabled={currency < upgrade.cost}
                       className={`px-4 py-2 rounded font-medium transition-colors ${
                         currency >= upgrade.cost
-                          ? "bg-blue-500 text-white hover:bg-blue-600"
-                          : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                          ? 'bg-blue-500 text-white hover:bg-blue-600'
+                          : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                       }`}
                     >
-                      {currency >= upgrade.cost ? "Purchase" : "Not enough $"}
+                      {currency >= upgrade.cost ? 'Purchase' : 'Not enough $'}
                     </button>
                   )}
                 </div>
 
                 {Object.keys(upgrade.effects).length > 0 && (
                   <div className="mt-3 text-xs text-gray-500">
-                    Effects:{" "}
+                    Effects:{' '}
                     {Object.entries(upgrade.effects)
-                      .map(
-                        ([key, value]) =>
-                          `${key}: ${value > 0 ? "+" : ""}${value}`,
-                      )
-                      .join(", ")}
+                      .map(([key, value]) => `${key}: ${value > 0 ? '+' : ''}${value}`)
+                      .join(', ')}
                   </div>
                 )}
               </motion.div>

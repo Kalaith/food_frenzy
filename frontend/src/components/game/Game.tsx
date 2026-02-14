@@ -1,15 +1,15 @@
-import React, { useState, useCallback } from "react";
-import { GameHeader } from "./GameHeader";
-import { RestaurantArea } from "./RestaurantArea";
-import { GameMessages } from "./GameMessages";
-import { VipInvitationModal } from "./VipInvitationModal";
-import ProgressionPanel from "./ProgressionPanel";
-import { useGameStore } from "../../stores/useGameStore";
-import { useGameMessages } from "../../hooks/useGameMessages";
-import { useCustomerSpawning } from "../../hooks/useCustomerSpawning";
-import { useVipInvitation } from "../../hooks/useVipInvitation";
-import { useDishHandling } from "../../hooks/useDishHandling";
-import type { Customer } from "../../types/game";
+import React, { useState, useCallback } from 'react';
+import { GameHeader } from './GameHeader';
+import { RestaurantArea } from './RestaurantArea';
+import { GameMessages } from './GameMessages';
+import { VipInvitationModal } from './VipInvitationModal';
+import ProgressionPanel from './ProgressionPanel';
+import { useGameStore } from '../../stores/useGameStore';
+import { useGameMessages } from '../../hooks/useGameMessages';
+import { useCustomerSpawning } from '../../hooks/useCustomerSpawning';
+import { useVipInvitation } from '../../hooks/useVipInvitation';
+import { useDishHandling } from '../../hooks/useDishHandling';
+import type { Customer } from '../../types/game';
 
 export const Game: React.FC = () => {
   const { customers, config } = useGameStore();
@@ -17,8 +17,7 @@ export const Game: React.FC = () => {
 
   // Custom hooks for game logic
   const { messages, showMessage } = useGameMessages();
-  const { handleDishReady, handleDishDropOnCustomer } =
-    useDishHandling(showMessage);
+  const { handleDishReady, handleDishDropOnCustomer } = useDishHandling(showMessage);
   const {
     invitedCustomer,
     showInviteModal,
@@ -32,18 +31,18 @@ export const Game: React.FC = () => {
 
   // Simple drag handlers (can be enhanced later)
   const handleDragStart = useCallback((customer: Customer) => {
-    console.log("Dragging customer:", customer.type.name);
+    console.log('Dragging customer:', customer.type.name);
   }, []);
 
   const handleDragEnd = useCallback(() => {
-    console.log("Drag ended");
+    console.log('Drag ended');
   }, []);
 
   const handleCustomerDrop = useCallback(
     (customer: Customer) => {
       handleSpecialInvite(customer);
     },
-    [handleSpecialInvite],
+    [handleSpecialInvite]
   );
 
   return (

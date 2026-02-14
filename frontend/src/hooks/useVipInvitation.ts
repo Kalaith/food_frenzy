@@ -1,7 +1,7 @@
-import { useState, useCallback } from "react";
-import { useGameStore } from "../stores/useGameStore";
-import { gameBalance } from "../constants/gameBalance";
-import type { Customer } from "../types/game";
+import { useState, useCallback } from 'react';
+import { useGameStore } from '../stores/useGameStore';
+import { gameBalance } from '../constants/gameBalance';
+import type { Customer } from '../types/game';
 
 export const useVipInvitation = (showMessage: (message: string) => void) => {
   const [invitedCustomer, setInvitedCustomer] = useState<Customer | null>(null);
@@ -13,11 +13,9 @@ export const useVipInvitation = (showMessage: (message: string) => void) => {
     (customer: Customer) => {
       setInvitedCustomer(customer);
       setShowInviteModal(true);
-      showMessage(
-        `${customer.type.name} has been invited to our VIP dining experience! ✨`,
-      );
+      showMessage(`${customer.type.name} has been invited to our VIP dining experience! ✨`);
     },
-    [showMessage],
+    [showMessage]
   );
 
   const handleInviteAccept = useCallback(() => {
@@ -29,16 +27,14 @@ export const useVipInvitation = (showMessage: (message: string) => void) => {
     if (willAccept) {
       removeCustomer(invitedCustomer.id);
       addCombo();
-      const points =
-        gameBalance.VIP_POINTS_PER_DELICIOUSNESS *
-        invitedCustomer.deliciousness;
+      const points = gameBalance.VIP_POINTS_PER_DELICIOUSNESS * invitedCustomer.deliciousness;
       addScore(points);
       showMessage(
-        `${invitedCustomer.type.name} accepted the VIP invitation! Gained ${points} points!`,
+        `${invitedCustomer.type.name} accepted the VIP invitation! Gained ${points} points!`
       );
     } else {
       showMessage(
-        `${invitedCustomer.type.name} got nervous and changed their mind. Try again later!`,
+        `${invitedCustomer.type.name} got nervous and changed their mind. Try again later!`
       );
     }
 
@@ -49,9 +45,7 @@ export const useVipInvitation = (showMessage: (message: string) => void) => {
   const handleInviteDecline = useCallback(() => {
     if (!invitedCustomer) return;
 
-    showMessage(
-      `${invitedCustomer.type.name} politely declined the invitation. Maybe next time!`,
-    );
+    showMessage(`${invitedCustomer.type.name} politely declined the invitation. Maybe next time!`);
     setShowInviteModal(false);
     setInvitedCustomer(null);
   }, [invitedCustomer, showMessage]);

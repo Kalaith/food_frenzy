@@ -1,24 +1,21 @@
-import React from "react";
-import { motion } from "framer-motion";
-import { useProgressionStore } from "../../stores/useProgressionStore";
+import React from 'react';
+import { motion } from 'framer-motion';
+import { useProgressionStore } from '../../stores/useProgressionStore';
 
 interface AchievementDisplayProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-const AchievementDisplay: React.FC<AchievementDisplayProps> = ({
-  isOpen,
-  onClose,
-}) => {
+const AchievementDisplay: React.FC<AchievementDisplayProps> = ({ isOpen, onClose }) => {
   const { achievements } = useProgressionStore();
 
-  const unlockedAchievements = achievements.filter((a) => a.unlocked);
-  const lockedAchievements = achievements.filter((a) => !a.unlocked);
+  const unlockedAchievements = achievements.filter(a => a.unlocked);
+  const lockedAchievements = achievements.filter(a => !a.unlocked);
 
   // Calculate completion percentage
   const completionPercentage = Math.round(
-    (unlockedAchievements.length / achievements.length) * 100,
+    (unlockedAchievements.length / achievements.length) * 100
   );
 
   if (!isOpen) return null;
@@ -36,15 +33,15 @@ const AchievementDisplay: React.FC<AchievementDisplayProps> = ({
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.8, opacity: 0 }}
         className="bg-white rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[80vh] overflow-hidden"
-        onClick={(e) => e.stopPropagation()}
+        onClick={e => e.stopPropagation()}
       >
         <div className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white p-6">
           <div className="flex justify-between items-center">
             <div>
               <h2 className="text-2xl font-bold">Achievements</h2>
               <p className="text-sm opacity-90 mt-1">
-                {unlockedAchievements.length} of {achievements.length} unlocked
-                ({completionPercentage}%)
+                {unlockedAchievements.length} of {achievements.length} unlocked (
+                {completionPercentage}%)
               </p>
             </div>
             <div className="text-right">
@@ -57,7 +54,7 @@ const AchievementDisplay: React.FC<AchievementDisplayProps> = ({
             <motion.div
               initial={{ width: 0 }}
               animate={{ width: `${completionPercentage}%` }}
-              transition={{ duration: 1, ease: "easeOut" }}
+              transition={{ duration: 1, ease: 'easeOut' }}
               className="h-full bg-white rounded-full"
             />
           </div>
@@ -72,7 +69,7 @@ const AchievementDisplay: React.FC<AchievementDisplayProps> = ({
                 Unlocked Achievements
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {unlockedAchievements.map((achievement) => (
+                {unlockedAchievements.map(achievement => (
                   <motion.div
                     key={achievement.id}
                     initial={{ opacity: 0, y: 20 }}
@@ -82,21 +79,15 @@ const AchievementDisplay: React.FC<AchievementDisplayProps> = ({
                     <div className="flex items-start justify-between mb-3">
                       <div className="text-2xl">🏆</div>
                       <div className="text-right">
-                        <div className="text-sm text-green-600 font-medium">
-                          Completed
-                        </div>
+                        <div className="text-sm text-green-600 font-medium">Completed</div>
                         <div className="text-lg font-bold text-green-600">
                           +${achievement.reward}
                         </div>
                       </div>
                     </div>
 
-                    <h4 className="font-bold text-lg mb-2">
-                      {achievement.name}
-                    </h4>
-                    <p className="text-gray-700 text-sm">
-                      {achievement.description}
-                    </p>
+                    <h4 className="font-bold text-lg mb-2">{achievement.name}</h4>
+                    <p className="text-gray-700 text-sm">{achievement.description}</p>
                   </motion.div>
                 ))}
               </div>
@@ -111,7 +102,7 @@ const AchievementDisplay: React.FC<AchievementDisplayProps> = ({
                 Locked Achievements
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {lockedAchievements.map((achievement) => (
+                {lockedAchievements.map(achievement => (
                   <motion.div
                     key={achievement.id}
                     whileHover={{ scale: 1.02 }}
@@ -121,18 +112,12 @@ const AchievementDisplay: React.FC<AchievementDisplayProps> = ({
                       <div className="text-2xl text-gray-400">🔒</div>
                       <div className="text-right">
                         <div className="text-sm text-gray-500">Reward</div>
-                        <div className="text-lg font-bold text-gray-500">
-                          ${achievement.reward}
-                        </div>
+                        <div className="text-lg font-bold text-gray-500">${achievement.reward}</div>
                       </div>
                     </div>
 
-                    <h4 className="font-bold text-lg mb-2 text-gray-600">
-                      {achievement.name}
-                    </h4>
-                    <p className="text-gray-500 text-sm mb-3">
-                      {achievement.description}
-                    </p>
+                    <h4 className="font-bold text-lg mb-2 text-gray-600">{achievement.name}</h4>
+                    <p className="text-gray-500 text-sm mb-3">{achievement.description}</p>
 
                     {/* Progress Bar */}
                     <div className="mb-2">

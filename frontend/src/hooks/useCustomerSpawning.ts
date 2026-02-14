@@ -1,7 +1,7 @@
-import { useEffect, useCallback } from "react";
-import { useGameStore } from "../stores/useGameStore";
-import { gameBalance } from "../constants/gameBalance";
-import type { Customer } from "../types/game";
+import { useEffect, useCallback } from 'react';
+import { useGameStore } from '../stores/useGameStore';
+import { gameBalance } from '../constants/gameBalance';
+import type { Customer } from '../types/game';
 
 export const useCustomerSpawning = (showMessage: (message: string) => void) => {
   const { customers, addCustomer, config, customerTypes } = useGameStore();
@@ -9,12 +9,11 @@ export const useCustomerSpawning = (showMessage: (message: string) => void) => {
   const spawnCustomer = useCallback(() => {
     const emptyTableIndex = Array(config.maxCustomers)
       .fill(null)
-      .findIndex((_, index) => !customers.some((c) => c.tableIndex === index));
+      .findIndex((_, index) => !customers.some(c => c.tableIndex === index));
 
     if (emptyTableIndex === -1) return;
 
-    const randomType =
-      customerTypes[Math.floor(Math.random() * customerTypes.length)];
+    const randomType = customerTypes[Math.floor(Math.random() * customerTypes.length)];
 
     // Apply special traits to max satisfaction
     let maxSatisfactionValues: Record<string, number> = {
@@ -63,19 +62,19 @@ export const useCustomerSpawning = (showMessage: (message: string) => void) => {
     if (randomType.specialTraits?.lowAppetite) {
       arrivalMessage += " 🦌 (She's quite shy and has a small appetite)";
     } else if (randomType.specialTraits?.canWander) {
-      arrivalMessage += " 🦆 (Keep an eye on her - she might wander!)";
+      arrivalMessage += ' 🦆 (Keep an eye on her - she might wander!)';
     } else if (randomType.specialTraits?.multipliesOnProcess) {
-      arrivalMessage += " 🐔 (Nervous but potentially profitable!)";
+      arrivalMessage += ' 🐔 (Nervous but potentially profitable!)';
     } else if (randomType.specialTraits?.fastSpoilage) {
       arrivalMessage += " 🐟 (Serve her quickly - fish doesn't wait!)";
     } else if (randomType.specialTraits?.canStealFood) {
-      arrivalMessage += " 🦊 (Watch your cooking stations!)";
+      arrivalMessage += ' 🦊 (Watch your cooking stations!)';
     } else if (randomType.specialTraits?.canEatWaste) {
       arrivalMessage += " 🐐 (She'll eat anything you give her!)";
     } else if (randomType.specialTraits?.highYield) {
-      arrivalMessage += " 🐻 (Big appetite, big rewards!)";
+      arrivalMessage += ' 🐻 (Big appetite, big rewards!)';
     } else if (randomType.specialTraits?.throwsFood) {
-      arrivalMessage += " 🐒 (Keep her entertained or chaos will ensue!)";
+      arrivalMessage += ' 🐒 (Keep her entertained or chaos will ensue!)';
     }
 
     showMessage(arrivalMessage);
@@ -83,8 +82,8 @@ export const useCustomerSpawning = (showMessage: (message: string) => void) => {
 
   useEffect(() => {
     // Much slower initial spawn using game balance constants
-    const spawnTimeouts = gameBalance.INITIAL_SPAWN_DELAYS.map((delay) =>
-      setTimeout(spawnCustomer, delay),
+    const spawnTimeouts = gameBalance.INITIAL_SPAWN_DELAYS.map(delay =>
+      setTimeout(spawnCustomer, delay)
     );
 
     // Regular spawning after initial customers

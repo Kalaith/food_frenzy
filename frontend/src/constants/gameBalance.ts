@@ -24,8 +24,7 @@ export const gameBalance = {
 } as const;
 
 // Helper function to calculate total max satisfaction
-export const getTotalMaxSatisfaction = () =>
-  gameBalance.MAX_SATISFACTION_PER_TYPE * 4; // 4 dish types
+export const getTotalMaxSatisfaction = () => gameBalance.MAX_SATISFACTION_PER_TYPE * 4; // 4 dish types
 
 // Helper function to get VIP threshold as percentage
 export const getVipThresholdPercentage = () =>

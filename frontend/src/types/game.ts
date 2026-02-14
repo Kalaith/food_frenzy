@@ -117,6 +117,6 @@ export interface DragState {
 export interface GameMessage {
   id: string;
   text: string;
-  type: "info" | "success" | "warning" | "error" | "combo";
+  type: 'info' | 'success' | 'warning' | 'error' | 'combo';
   timestamp: number;
 }

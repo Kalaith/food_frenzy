@@ -1,8 +1,8 @@
-import React, { useState } from "react";
-import { motion } from "framer-motion";
-import type { Customer } from "../../types/game";
-import { useGameStore } from "../../stores/useGameStore";
-import { useProgressionStore } from "../../stores/useProgressionStore";
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
+import type { Customer } from '../../types/game';
+import { useGameStore } from '../../stores/useGameStore';
+import { useProgressionStore } from '../../stores/useProgressionStore';
 
 interface SpecialTableProps {
   onDrop: (customer: Customer) => void;
@@ -10,16 +10,9 @@ interface SpecialTableProps {
 
 export const SpecialTable: React.FC<SpecialTableProps> = ({ onDrop }) => {
   const [isHovered, setIsHovered] = useState(false);
-  const [processingCustomer, setProcessingCustomer] = useState<Customer | null>(
-    null,
-  );
-  const {
-    specialTableBusy,
-    setSpecialTableBusy,
-    updateIngredients,
-    addScore,
-    addToChain,
-  } = useGameStore();
+  const [processingCustomer, setProcessingCustomer] = useState<Customer | null>(null);
+  const { specialTableBusy, setSpecialTableBusy, updateIngredients, addScore, addToChain } =
+    useGameStore();
   const { addCurrency } = useProgressionStore();
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -35,7 +28,7 @@ export const SpecialTable: React.FC<SpecialTableProps> = ({ onDrop }) => {
     e.preventDefault();
     setIsHovered(false);
 
-    const customerData = e.dataTransfer.getData("customer");
+    const customerData = e.dataTransfer.getData('customer');
     if (!customerData) return;
 
     const customer: Customer = JSON.parse(customerData);
@@ -57,10 +50,9 @@ export const SpecialTable: React.FC<SpecialTableProps> = ({ onDrop }) => {
     // Calculate meat yield
     const totalSatisfaction = Object.values(customer.satisfaction).reduce(
       (sum, val) => sum + val,
-      0,
+      0
     );
-    const meatGained =
-      Math.floor(totalSatisfaction / 15) + Math.floor(customer.deliciousness);
+    const meatGained = Math.floor(totalSatisfaction / 15) + Math.floor(customer.deliciousness);
     const meatType = `${customer.type.type}-meat`;
 
     // Add to chain
@@ -69,8 +61,7 @@ export const SpecialTable: React.FC<SpecialTableProps> = ({ onDrop }) => {
     setTimeout(() => {
       // Update ingredients
       updateIngredients({
-        [meatType]:
-          (useGameStore.getState().ingredients[meatType] || 0) + meatGained,
+        [meatType]: (useGameStore.getState().ingredients[meatType] || 0) + meatGained,
       });
 
       // Calculate score
@@ -88,7 +79,7 @@ export const SpecialTable: React.FC<SpecialTableProps> = ({ onDrop }) => {
 
   return (
     <motion.div
-      className={`special-table ${specialTableBusy ? "processing" : ""} ${isHovered ? "hovered" : ""}`}
+      className={`special-table ${specialTableBusy ? 'processing' : ''} ${isHovered ? 'hovered' : ''}`}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
@@ -99,8 +90,8 @@ export const SpecialTable: React.FC<SpecialTableProps> = ({ onDrop }) => {
 
       <div className="special-status">
         {specialTableBusy
-          ? "VIP Experience in Progress..."
-          : "Exclusive dining for our finest guests"}
+          ? 'VIP Experience in Progress...'
+          : 'Exclusive dining for our finest guests'}
       </div>
 
       <div className="processing-area">
@@ -110,19 +101,14 @@ export const SpecialTable: React.FC<SpecialTableProps> = ({ onDrop }) => {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
           >
-            Preparing exclusive dining experience for{" "}
-            {processingCustomer.type.name}...
+            Preparing exclusive dining experience for {processingCustomer.type.name}...
             <div className="processing-animation">🍽️✨</div>
           </motion.div>
         )}
       </div>
 
       {isHovered && !specialTableBusy && (
-        <motion.div
-          className="drop-indicator"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-        >
+        <motion.div className="drop-indicator" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
           Drop here to process!
         </motion.div>
       )}
