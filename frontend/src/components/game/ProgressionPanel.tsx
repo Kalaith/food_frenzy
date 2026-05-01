@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useProgressionStore } from '../../stores/useProgressionStore';
+import { useGameStore } from '../../stores/useGameStore';
 import UpgradeShop from './UpgradeShop';
 import RecipeMenu from './RecipeMenu';
 import AchievementDisplay from './AchievementDisplay';
@@ -11,15 +12,32 @@ interface ProgressionPanelProps {
 }
 
 const ProgressionPanel: React.FC<ProgressionPanelProps> = ({ isOpen, onToggle }) => {
-  const { currency, prestigeLevel, totalScore, upgrades, recipes, achievements } =
-    useProgressionStore();
+  const {
+    currency,
+    prestigeLevel,
+    prestigePoints,
+    totalScore,
+    upgrades,
+    recipes,
+    achievements,
+    canPrestige,
+    getPrestigeReward,
+    prestige,
+  } = useProgressionStore();
+  const { resetGame } = useGameStore();
   const [activeModal, setActiveModal] = useState<'upgrades' | 'recipes' | 'achievements' | null>(
     null
   );
 
-  const purchasedUpgrades = upgrades.filter(u => u.purchased).length;
+  const purchasedUpgrades = upgrades.reduce(
+    (sum, upgrade) => sum + (upgrade.level ?? (upgrade.purchased ? upgrade.maxLevel || 1 : 0)),
+    0
+  );
+  const maxUpgradeLevels = upgrades.reduce((sum, upgrade) => sum + (upgrade.maxLevel || 1), 0);
   const unlockedRecipes = recipes.filter(r => r.unlocked).length;
   const unlockedAchievements = achievements.filter(a => a.unlocked).length;
+  const prestigeReady = canPrestige();
+  const prestigeReward = getPrestigeReward();
 
   const openModal = (modal: 'upgrades' | 'recipes' | 'achievements') => {
     setActiveModal(modal);
@@ -27,6 +45,13 @@ const ProgressionPanel: React.FC<ProgressionPanelProps> = ({ isOpen, onToggle })
 
   const closeModal = () => {
     setActiveModal(null);
+  };
+
+  const handlePrestige = () => {
+    if (!prestigeReady) return;
+
+    prestige();
+    resetGame();
   };
 
   return (
@@ -71,6 +96,7 @@ const ProgressionPanel: React.FC<ProgressionPanelProps> = ({ isOpen, onToggle })
             <div className="mt-2 text-sm opacity-90">
               Total Score: {totalScore.toLocaleString()}
             </div>
+            <div className="mt-1 text-sm opacity-90">Prestige Power: +{prestigePoints}</div>
           </div>
 
           {/* Progression Options */}
@@ -86,7 +112,7 @@ const ProgressionPanel: React.FC<ProgressionPanelProps> = ({ isOpen, onToggle })
                 <div className="text-left">
                   <div className="font-bold text-lg">🏪 Upgrades</div>
                   <div className="text-sm opacity-90">
-                    {purchasedUpgrades} of {upgrades.length} purchased
+                    {purchasedUpgrades} of {maxUpgradeLevels} levels
                   </div>
                 </div>
                 <div className="text-2xl">→</div>
@@ -130,6 +156,28 @@ const ProgressionPanel: React.FC<ProgressionPanelProps> = ({ isOpen, onToggle })
             </motion.button>
           </div>
 
+          <div className="mt-6 rounded-lg border border-indigo-200 bg-indigo-50 p-4">
+            <div className="mb-2 flex items-center justify-between">
+              <h3 className="font-bold text-indigo-900">Prestige</h3>
+              <span className="text-sm font-semibold text-indigo-700">+{prestigeReward} power</span>
+            </div>
+            <p className="mb-3 text-sm text-indigo-800">
+              Requires 50,000 total score. Resets the current run and progression unlocks, then
+              grants permanent scoring power and bonus currency.
+            </p>
+            <button
+              onClick={handlePrestige}
+              disabled={!prestigeReady}
+              className={`w-full rounded px-4 py-2 font-semibold transition-colors ${
+                prestigeReady
+                  ? 'bg-indigo-600 text-white hover:bg-indigo-700'
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              }`}
+            >
+              {prestigeReady ? 'Prestige Restaurant' : 'Earn more score'}
+            </button>
+          </div>
+
           {/* Quick Stats */}
           <div className="mt-8 p-4 bg-gray-50 rounded-lg">
             <h3 className="font-bold text-gray-800 mb-3">Quick Stats</h3>
@@ -151,7 +199,7 @@ const ProgressionPanel: React.FC<ProgressionPanelProps> = ({ isOpen, onToggle })
                 <span className="font-medium">
                   {Math.round(
                     ((purchasedUpgrades + unlockedRecipes + unlockedAchievements) /
-                      (upgrades.length + recipes.length + achievements.length)) *
+                      (maxUpgradeLevels + recipes.length + achievements.length)) *
                       100
                   )}
                   %

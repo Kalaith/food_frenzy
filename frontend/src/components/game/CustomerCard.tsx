@@ -2,12 +2,14 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { gameBalance } from '../../constants/gameBalance';
 import type { Customer } from '../../types/game';
+import { getCharacterImage } from './characterAssets';
+import { getCustomerDisplayName } from '../../utils/customerDisplay';
 
 interface CustomerCardProps {
   customer: Customer;
   onDragStart: (customer: Customer) => void;
   onDragEnd: () => void;
-  onDishDrop: (customerId: number, dishColor: string, dishName: string) => void;
+  onDishDrop: (customerId: number, dishColor: string, dishName: string, dishIndex: number) => void;
   onSpecialInvite: (customer: Customer) => void;
 }
 
@@ -18,8 +20,7 @@ export const CustomerCard: React.FC<CustomerCardProps> = ({
   onDishDrop,
   onSpecialInvite,
 }) => {
-  const handleMouseDown = (e: React.MouseEvent) => {
-    e.preventDefault();
+  const handleMouseDown = () => {
     onDragStart(customer);
   };
 
@@ -36,9 +37,15 @@ export const CustomerCard: React.FC<CustomerCardProps> = ({
     e.preventDefault();
     const dishData = e.dataTransfer.getData('dish');
     if (dishData) {
-      const { color, name } = JSON.parse(dishData);
-      onDishDrop(customer.id, color, name);
+      const { color, name, index } = JSON.parse(dishData);
+      onDishDrop(customer.id, color, name, index);
     }
+  };
+
+  const handleNativeDragStart = (e: React.DragEvent) => {
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('customer', JSON.stringify(customer));
+    onDragStart(customer);
   };
 
   const totalSatisfaction = Object.values(customer.satisfaction).reduce((sum, val) => sum + val, 0);
@@ -114,6 +121,9 @@ export const CustomerCard: React.FC<CustomerCardProps> = ({
     }
   };
 
+  const characterImage = getCharacterImage(customer.type.type);
+  const displayName = getCustomerDisplayName(customer);
+
   return (
     <motion.div
       className={`
@@ -125,25 +135,34 @@ export const CustomerCard: React.FC<CustomerCardProps> = ({
       onMouseUp={handleMouseUp}
       onDragOver={handleDragOver}
       onDrop={handleDrop}
+      draggable
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
-      drag
-      dragConstraints={{ left: 0, top: 0, right: 0, bottom: 0 }}
-      onDragStart={() => onDragStart(customer)}
+      onDragStartCapture={handleNativeDragStart}
       onDragEnd={onDragEnd}
     >
       {/* Customer Info */}
       <div className="text-center mb-3">
-        <div className="font-bold text-gray-800 text-sm">{customer.type.name}</div>
+        <div className="font-bold text-gray-800 text-base">{displayName}</div>
+        <div className="text-xs font-semibold text-gray-600">{customer.type.name}</div>
         <div className="text-xs text-gray-600 leading-tight">{customer.type.description}</div>
       </div>
 
       {/* Customer Avatar */}
       <div className="flex justify-center mb-3">
         <div
-          className={`w-12 h-12 rounded-full flex items-center justify-center text-2xl ${getAvatarBgColor()}`}
+          className={`w-24 h-28 rounded-lg flex items-center justify-center overflow-hidden shadow-inner ${getAvatarBgColor()}`}
         >
-          😊
+          {characterImage ? (
+            <img
+              src={characterImage}
+              alt={`${displayName} portrait`}
+              className="h-full w-full object-contain"
+              draggable={false}
+            />
+          ) : (
+            <span className="text-2xl">😊</span>
+          )}
         </div>
       </div>
 

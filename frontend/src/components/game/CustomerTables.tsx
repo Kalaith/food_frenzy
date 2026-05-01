@@ -7,7 +7,7 @@ interface CustomerTablesProps {
   maxCustomers: number;
   onDragStart: (customer: Customer) => void;
   onDragEnd: () => void;
-  onDishDrop: (customerId: number, dishColor: string, dishName: string) => void;
+  onDishDrop: (customerId: number, dishColor: string, dishName: string, dishIndex: number) => void;
   onSpecialInvite: (customer: Customer) => void;
 }
 

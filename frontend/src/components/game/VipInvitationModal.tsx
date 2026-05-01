@@ -1,6 +1,8 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import type { Customer } from '../../types/game';
+import { getCharacterImage } from './characterAssets';
+import { getCustomerDisplayName } from '../../utils/customerDisplay';
 
 interface VipInvitationModalProps {
   customer: Customer | null;
@@ -16,6 +18,9 @@ export const VipInvitationModal: React.FC<VipInvitationModalProps> = ({
   onDecline,
 }) => {
   if (!isOpen || !customer) return null;
+
+  const characterImage = getCharacterImage(customer.type.type);
+  const displayName = getCustomerDisplayName(customer);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
@@ -46,7 +51,7 @@ export const VipInvitationModal: React.FC<VipInvitationModalProps> = ({
           <div className="text-center mb-6">
             <div
               className={`
-              inline-flex items-center justify-center w-20 h-20 rounded-full text-4xl mb-3
+              inline-flex items-center justify-center w-20 h-20 rounded-full text-4xl mb-3 overflow-hidden
               ${customer.type.type === 'pig' ? 'bg-pink-100' : ''}
               ${customer.type.type === 'cow' ? 'bg-yellow-100' : ''}
               ${customer.type.type === 'sheep' ? 'bg-gray-100' : ''}
@@ -62,15 +67,25 @@ export const VipInvitationModal: React.FC<VipInvitationModalProps> = ({
               ${customer.type.type === 'monkey' ? 'bg-yellow-100' : ''}
             `}
             >
-              😊
+              {characterImage ? (
+                <img
+                  src={characterImage}
+                  alt={`${displayName} portrait`}
+                  className="h-full w-full object-contain"
+                  draggable={false}
+                />
+              ) : (
+                <span>😊</span>
+              )}
             </div>
-            <h3 className="text-xl font-semibold text-gray-800">{customer.type.name}</h3>
+            <h3 className="text-xl font-semibold text-gray-800">{displayName}</h3>
+            <div className="text-sm font-medium text-gray-500">{customer.type.name}</div>
           </div>
 
           {/* Invitation Text */}
           <div className="space-y-3 text-gray-700 text-sm leading-relaxed">
             <p>
-              Dear <span className="font-semibold">{customer.type.name}</span>,
+              Dear <span className="font-semibold">{displayName}</span>,
             </p>
             <p>
               We are delighted to invite you to our exclusive VIP dining experience! You have been

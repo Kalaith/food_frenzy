@@ -8,24 +8,24 @@
  * Standard API Response Wrapper
  */
 export class ApiResponse<T = unknown> {
-    success!: boolean;
-    data?: T;
-    error?: string;
+  success!: boolean;
+  data?: T;
+  error?: string;
 
-    constructor(init?: Partial<ApiResponse<T>>) {
-        Object.assign(this, init);
-    }
+  constructor(init?: Partial<ApiResponse<T>>) {
+    Object.assign(this, init);
+  }
 }
 
 /**
  * Standard API Error Class
  */
 export class ApiError extends Error {
-    public status: number;
+  public status: number;
 
-    constructor(message: string, status: number = 500) {
-        super(message);
-        this.name = 'ApiError';
-        this.status = status;
-    }
+  constructor(message: string, status: number = 500) {
+    super(message);
+    this.name = 'ApiError';
+    this.status = status;
+  }
 }

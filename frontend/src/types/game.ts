@@ -26,6 +26,8 @@ export interface DishType {
 
 export interface Customer {
   id: number;
+  guestId: string;
+  displayName: string;
   type: CustomerType;
   satisfaction: Record<string, number>;
   maxSatisfaction: Record<string, number>;
@@ -34,6 +36,17 @@ export interface Customer {
   overfed: boolean;
   isDragging: boolean;
   tableIndex?: number; // Optional table index for rendering
+  arrivedAt?: number;
+}
+
+export interface GuestRecord {
+  id: string;
+  name: string;
+  customerType: string;
+  visits: number;
+  feedings: number;
+  processedCount: number;
+  lastSeenAt: number;
 }
 
 export interface GameState {
@@ -62,6 +75,10 @@ export interface Upgrade {
   name: string;
   description: string;
   cost: number;
+  baseCost: number;
+  level: number;
+  maxLevel: number;
+  costGrowth: number;
   purchased: boolean;
   effects: Record<string, number>;
 }
@@ -75,6 +92,8 @@ export interface Recipe {
   unlocked: boolean;
   unlockCondition: string;
   profitMultiplier: number;
+  baseValue: number;
+  capacityBonus: number;
 }
 
 export interface Achievement {
@@ -93,7 +112,16 @@ export interface MetaProgression {
   recipes: Recipe[];
   achievements: Achievement[];
   prestigeLevel: number;
+  prestigePoints: number;
   totalScore: number;
+  processedCustomerCounts: Record<string, number>;
+  processedCustomerTypes: string[];
+  feedingCapacityBonus: number;
+  craftedRecipeCounts: Record<string, number>;
+  totalDishesServed: number;
+  preferredDishesServed: number;
+  overfedCustomerCount: number;
+  customersLost: number;
 }
 
 // Game Configuration

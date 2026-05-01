@@ -3,8 +3,10 @@ import { GameHeader } from './GameHeader';
 import { RestaurantArea } from './RestaurantArea';
 import { GameMessages } from './GameMessages';
 import { VipInvitationModal } from './VipInvitationModal';
+import { BalanceSimulatorPanel } from './BalanceSimulatorPanel';
 import ProgressionPanel from './ProgressionPanel';
 import { useGameStore } from '../../stores/useGameStore';
+import { useProgressionStore } from '../../stores/useProgressionStore';
 import { useGameMessages } from '../../hooks/useGameMessages';
 import { useCustomerSpawning } from '../../hooks/useCustomerSpawning';
 import { useVipInvitation } from '../../hooks/useVipInvitation';
@@ -13,7 +15,11 @@ import type { Customer } from '../../types/game';
 
 export const Game: React.FC = () => {
   const { customers, config } = useGameStore();
+  const maxCustomersBonus = useProgressionStore(state =>
+    state.getPurchasedEffect('maxCustomersBonus', 0)
+  );
   const [progressionPanelOpen, setProgressionPanelOpen] = useState(false);
+  const maxCustomers = config.maxCustomers + Math.floor(maxCustomersBonus);
 
   // Custom hooks for game logic
   const { messages, showMessage } = useGameMessages();
@@ -51,7 +57,7 @@ export const Game: React.FC = () => {
 
       <RestaurantArea
         customers={customers}
-        maxCustomers={config.maxCustomers}
+        maxCustomers={maxCustomers}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
         onDishDrop={handleDishDropOnCustomer}
@@ -73,6 +79,8 @@ export const Game: React.FC = () => {
         onAccept={handleInviteAccept}
         onDecline={handleInviteDecline}
       />
+
+      <BalanceSimulatorPanel />
     </div>
   );
 };

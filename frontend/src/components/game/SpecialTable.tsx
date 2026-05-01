@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import type { Customer } from '../../types/game';
 import { useGameStore } from '../../stores/useGameStore';
-import { useProgressionStore } from '../../stores/useProgressionStore';
 
 interface SpecialTableProps {
   onDrop: (customer: Customer) => void;
@@ -10,10 +9,7 @@ interface SpecialTableProps {
 
 export const SpecialTable: React.FC<SpecialTableProps> = ({ onDrop }) => {
   const [isHovered, setIsHovered] = useState(false);
-  const [processingCustomer, setProcessingCustomer] = useState<Customer | null>(null);
-  const { specialTableBusy, setSpecialTableBusy, updateIngredients, addScore, addToChain } =
-    useGameStore();
-  const { addCurrency } = useProgressionStore();
+  const { specialTableBusy } = useGameStore();
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -38,43 +34,7 @@ export const SpecialTable: React.FC<SpecialTableProps> = ({ onDrop }) => {
       return;
     }
 
-    // Process the customer
-    processCustomer(customer);
     onDrop(customer);
-  };
-
-  const processCustomer = (customer: Customer) => {
-    setSpecialTableBusy(true);
-    setProcessingCustomer(customer);
-
-    // Calculate meat yield
-    const totalSatisfaction = Object.values(customer.satisfaction).reduce(
-      (sum, val) => sum + val,
-      0
-    );
-    const meatGained = Math.floor(totalSatisfaction / 15) + Math.floor(customer.deliciousness);
-    const meatType = `${customer.type.type}-meat`;
-
-    // Add to chain
-    addToChain(customer.id);
-
-    setTimeout(() => {
-      // Update ingredients
-      updateIngredients({
-        [meatType]: (useGameStore.getState().ingredients[meatType] || 0) + meatGained,
-      });
-
-      // Calculate score
-      const scoreGained = meatGained * 10 * customer.deliciousness;
-      addScore(scoreGained);
-
-      // Add progression currency
-      addCurrency(Math.floor(scoreGained / 5));
-
-      // Reset table
-      setSpecialTableBusy(false);
-      setProcessingCustomer(null);
-    }, 3000);
   };
 
   return (
@@ -95,13 +55,13 @@ export const SpecialTable: React.FC<SpecialTableProps> = ({ onDrop }) => {
       </div>
 
       <div className="processing-area">
-        {processingCustomer && (
+        {specialTableBusy && (
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
           >
-            Preparing exclusive dining experience for {processingCustomer.type.name}...
+            Preparing the exclusive dining experience...
             <div className="processing-animation">🍽️✨</div>
           </motion.div>
         )}

@@ -1,9 +1,13 @@
 import { useCallback } from 'react';
 import { useGameStore } from '../stores/useGameStore';
+import { useGuestStore } from '../stores/useGuestStore';
+import { useProgressionStore } from '../stores/useProgressionStore';
 import { gameBalance } from '../constants/gameBalance';
+import { getCustomerDisplayName } from '../utils/customerDisplay';
 
 export const useDishHandling = (showMessage: (message: string) => void) => {
-  const { customers, updateCustomer, addScore, canProcessCustomer } = useGameStore();
+  const { customers, updateCustomer, addScore, canProcessCustomer, removeDish } = useGameStore();
+  const { recordServedDish } = useProgressionStore();
 
   const handleDishReady = useCallback(
     (dishName: string) => {
@@ -13,7 +17,7 @@ export const useDishHandling = (showMessage: (message: string) => void) => {
   );
 
   const handleDishDropOnCustomer = useCallback(
-    (customerId: number, dishColor: string, dishName: string) => {
+    (customerId: number, dishColor: string, dishName: string, dishIndex: number) => {
       const customer = customers.find(c => c.id === customerId);
       if (!customer) return;
 
@@ -24,15 +28,28 @@ export const useDishHandling = (showMessage: (message: string) => void) => {
       if (isPreferred) {
         satisfactionGain = gameBalance.PREFERRED_SATISFACTION_GAIN;
         deliciousnessGain = 1;
-        showMessage(`${customer.type.name} loves ${dishName}! +${satisfactionGain} satisfaction!`);
+        showMessage(
+          `${getCustomerDisplayName(customer)} loves ${dishName}! +${satisfactionGain} satisfaction!`
+        );
+      } else if (customer.type.specialTraits?.canEatWaste) {
+        satisfactionGain = gameBalance.PREFERRED_SATISFACTION_GAIN - 2;
+        deliciousnessGain = 1;
+        showMessage(
+          `${getCustomerDisplayName(customer)} happily accepts ${dishName}! +${satisfactionGain} satisfaction!`
+        );
       } else {
-        showMessage(`${customer.type.name} ate ${dishName}. +${satisfactionGain} satisfaction.`);
+        showMessage(
+          `${getCustomerDisplayName(customer)} ate ${dishName}. +${satisfactionGain} satisfaction.`
+        );
       }
 
       // Calculate new satisfaction
       const newSatisfaction = { ...customer.satisfaction };
+      const overfeedMultiplier = customer.type.specialTraits?.lowAppetite
+        ? 1.25
+        : gameBalance.OVERFEED_MULTIPLIER;
       newSatisfaction[dishColor] = Math.min(
-        customer.maxSatisfaction[dishColor] * 1.5, // Allow overfeeding up to 1.5x
+        customer.maxSatisfaction[dishColor] * overfeedMultiplier,
         customer.satisfaction[dishColor] + satisfactionGain
       );
 
@@ -53,6 +70,9 @@ export const useDishHandling = (showMessage: (message: string) => void) => {
         totalSatisfaction: newTotalSatisfaction,
         overfed: isOverfed,
       });
+      recordServedDish(isPreferred, isOverfed);
+      useGuestStore.getState().recordGuestFed(customer.guestId);
+      removeDish(dishColor, dishIndex);
 
       // Score points using game balance
       addScore(
@@ -69,10 +89,18 @@ export const useDishHandling = (showMessage: (message: string) => void) => {
           totalSatisfaction: newTotalSatisfaction,
         })
       ) {
-        showMessage(`${customer.type.name} is ready for the Special Table! 🔪`);
+        showMessage(`${getCustomerDisplayName(customer)} is ready for the Special Table! 🔪`);
       }
     },
-    [customers, updateCustomer, addScore, canProcessCustomer, showMessage]
+    [
+      customers,
+      updateCustomer,
+      addScore,
+      canProcessCustomer,
+      removeDish,
+      recordServedDish,
+      showMessage,
+    ]
   );
 
   return {

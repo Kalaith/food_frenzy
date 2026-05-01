@@ -1,110 +1,9 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { gameBalance } from '../constants/gameBalance';
-import type { GameState, Customer, CustomerType, GameConfig } from '../types/game';
-
-// Game data
-const customerTypes: CustomerType[] = [
-  {
-    type: 'pig',
-    name: 'Pig Girl',
-    preferredDishes: ['blue', 'red'],
-    baseDeliciousness: 2,
-    description: 'Loves hearty main courses and sweet desserts',
-  },
-  {
-    type: 'cow',
-    name: 'Cow Girl',
-    preferredDishes: ['green', 'yellow'],
-    baseDeliciousness: 3,
-    description: 'Enjoys soups and substantial meals',
-  },
-  {
-    type: 'sheep',
-    name: 'Sheep Girl',
-    preferredDishes: ['blue', 'green'],
-    baseDeliciousness: 2,
-    description: 'Prefers light appetizers and warm soups',
-  },
-  {
-    type: 'rabbit',
-    name: 'Rabbit Girl',
-    preferredDishes: ['blue', 'red'],
-    baseDeliciousness: 1,
-    description: 'Loves appetizers and desserts',
-  },
-  {
-    type: 'cat',
-    name: 'Cat Girl',
-    preferredDishes: ['yellow', 'blue'],
-    baseDeliciousness: 4,
-    description: 'Enjoys main courses and appetizers',
-  },
-  {
-    type: 'deer',
-    name: 'Deer Girl',
-    preferredDishes: ['green', 'blue'],
-    baseDeliciousness: 3,
-    description: '🦌 Polite and shy, prefers fresh greens and forest-inspired dishes',
-    specialTraits: { lowAppetite: true },
-  },
-  {
-    type: 'duck',
-    name: 'Duck Girl',
-    preferredDishes: ['yellow', 'green'],
-    baseDeliciousness: 2,
-    description: '🦆 Quirky and loud, loves bread-based meals and waterfowl-friendly soups',
-    specialTraits: { canWander: true },
-  },
-  {
-    type: 'chicken',
-    name: 'Chicken Girl',
-    preferredDishes: ['yellow', 'red'],
-    baseDeliciousness: 2,
-    description: '🐔 Nervous and fussy, prefers grain-based meals and fried snacks',
-    specialTraits: { multipliesOnProcess: true },
-  },
-  {
-    type: 'fish',
-    name: 'Fish Girl',
-    preferredDishes: ['blue', 'green'],
-    baseDeliciousness: 4,
-    description: '🐟 Laid-back and cool, enjoys seaweed, sushi, and lighter fare',
-    specialTraits: { fastSpoilage: true },
-  },
-  {
-    type: 'fox',
-    name: 'Fox Girl',
-    preferredDishes: ['red', 'yellow'],
-    baseDeliciousness: 3,
-    description: '🦊 Cunning and playful, loves spicy dishes and street food',
-    specialTraits: { canStealFood: true },
-  },
-  {
-    type: 'goat',
-    name: 'Goat Girl',
-    preferredDishes: ['green', 'yellow'],
-    baseDeliciousness: 2,
-    description: '🐐 Stubborn and quirky, enjoys chewy foods and herbs',
-    specialTraits: { canEatWaste: true },
-  },
-  {
-    type: 'bear',
-    name: 'Bear Girl',
-    preferredDishes: ['red', 'yellow'],
-    baseDeliciousness: 5,
-    description: '🐻 Big appetite and warm demeanor, loves honey desserts and hearty stews',
-    specialTraits: { highYield: true },
-  },
-  {
-    type: 'monkey',
-    name: 'Monkey Girl',
-    preferredDishes: ['red', 'blue'],
-    baseDeliciousness: 2,
-    description: '🐒 Energetic and cheeky, prefers fruits and finger foods',
-    specialTraits: { throwsFood: true },
-  },
-];
+import { customerTypes } from '../constants/gameData';
+import { useProgressionStore } from './useProgressionStore';
+import type { GameState, Customer, CustomerType, GameConfig, Recipe } from '../types/game';
 
 const gameConfig: GameConfig = {
   maxCustomers: gameBalance.MAX_CUSTOMERS,
@@ -118,7 +17,7 @@ const gameConfig: GameConfig = {
 
 interface GameStore extends GameState {
   // Actions
-  addScore: (points: number) => void;
+  addScore: (points: number, options?: { applyCombo?: boolean }) => void;
   addCombo: () => void;
   resetCombo: () => void;
   addToChain: (customerId: number) => void;
@@ -127,6 +26,8 @@ interface GameStore extends GameState {
   updateCustomer: (customerId: number, updates: Partial<Customer>) => void;
   setSpecialTableBusy: (busy: boolean) => void;
   updateIngredients: (ingredients: Record<string, number>) => void;
+  spendIngredients: (ingredients: Record<string, number>) => boolean;
+  craftRecipe: (recipe: Recipe) => boolean;
   resetGame: () => void;
 
   // Dish management
@@ -163,10 +64,20 @@ export const useGameStore = create<GameStore>()(
       config: gameConfig,
       customerTypes,
 
-      addScore: points =>
-        set(state => ({
-          score: state.score + Math.floor(points * (1 + state.combo * 0.1)),
-        })),
+      addScore: (points, options) =>
+        set(state => {
+          const progression = useProgressionStore.getState();
+          const comboBoost = progression.getPurchasedEffect('comboMultiplier', 1);
+          const prestigeMultiplier = 1 + progression.prestigePoints * 0.03;
+          const comboMultiplier =
+            options?.applyCombo === false ? 1 : 1 + state.combo * 0.1 * comboBoost;
+          const scoredPoints = Math.floor(points * comboMultiplier * prestigeMultiplier);
+          progression.recordScore(scoredPoints);
+
+          return {
+            score: state.score + scoredPoints,
+          };
+        }),
 
       addCombo: () => set(state => ({ combo: state.combo + 1 })),
 
@@ -199,6 +110,51 @@ export const useGameStore = create<GameStore>()(
         set(state => ({
           ingredients: { ...state.ingredients, ...newIngredients },
         })),
+
+      spendIngredients: ingredients => {
+        const state = get();
+        const hasIngredients = Object.entries(ingredients).every(
+          ([ingredient, amount]) => (state.ingredients[ingredient] || 0) >= amount
+        );
+
+        if (!hasIngredients) {
+          return false;
+        }
+
+        set({
+          ingredients: Object.entries(ingredients).reduce(
+            (nextIngredients, [ingredient, amount]) => ({
+              ...nextIngredients,
+              [ingredient]: nextIngredients[ingredient] - amount,
+            }),
+            { ...state.ingredients }
+          ),
+        });
+
+        return true;
+      },
+
+      craftRecipe: recipe => {
+        if (!recipe.unlocked || !get().spendIngredients(recipe.ingredients)) {
+          return false;
+        }
+
+        const progression = useProgressionStore.getState();
+        const recipeValueMultiplier = progression.getPurchasedEffect('recipeValueMultiplier', 1);
+        const capacityGainMultiplier = progression.getPurchasedEffect('capacityGainMultiplier', 1);
+        const scoreGained = Math.floor(
+          recipe.baseValue * recipe.profitMultiplier * recipeValueMultiplier
+        );
+        get().addScore(scoreGained, { applyCombo: false });
+
+        progression.addCurrency(Math.floor(scoreGained / 4));
+        progression.recordCraftedRecipe(
+          recipe.id,
+          Math.max(1, Math.floor(recipe.capacityBonus * capacityGainMultiplier))
+        );
+
+        return true;
+      },
 
       resetGame: () => set(initialState),
 

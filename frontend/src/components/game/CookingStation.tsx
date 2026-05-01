@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useGameStore } from '../../stores/useGameStore';
+import { useProgressionStore } from '../../stores/useProgressionStore';
 import type { DishType } from '../../types/game';
 
 interface CookingStationProps {
@@ -11,6 +12,9 @@ interface CookingStationProps {
 
 export const CookingStation: React.FC<CookingStationProps> = ({ color, dishType, onDishReady }) => {
   const { addDish, removeDish: removeFromStore, getDishesForStation } = useGameStore();
+  const cookTimeMultiplier = useProgressionStore(state =>
+    state.getPurchasedEffect('cookTimeMultiplier', 1)
+  );
   const [isCooking, setIsCooking] = useState(false);
   const [timeLeft, setTimeLeft] = useState(0);
 
@@ -19,8 +23,10 @@ export const CookingStation: React.FC<CookingStationProps> = ({ color, dishType,
   const startCooking = () => {
     if (isCooking) return;
 
+    const cookTime = Math.max(1000, Math.round(dishType.cookTime * cookTimeMultiplier));
+
     setIsCooking(true);
-    setTimeLeft(dishType.cookTime / 1000);
+    setTimeLeft(Math.ceil(cookTime / 1000));
 
     const timer = setInterval(() => {
       setTimeLeft(prev => {
@@ -72,10 +78,6 @@ export const CookingStation: React.FC<CookingStationProps> = ({ color, dishType,
             draggable
             onDragStart={(e: React.DragEvent) => {
               e.dataTransfer.setData('dish', JSON.stringify({ color, name: dish, index }));
-            }}
-            onDragEnd={() => {
-              // Remove dish after successful drag
-              handleRemoveDish(index);
             }}
             onDoubleClick={() => handleRemoveDish(index)}
             title={`Drag ${dish} to a customer`}

@@ -5,7 +5,7 @@ import { useProgressionStore } from '../../stores/useProgressionStore';
 
 export const GameHeader: React.FC = () => {
   const { score, combo, chain, ingredients } = useGameStore();
-  const { currency } = useProgressionStore();
+  const { currency, feedingCapacityBonus } = useProgressionStore();
 
   return (
     <motion.div
@@ -71,6 +71,19 @@ export const GameHeader: React.FC = () => {
             className="text-2xl font-bold text-gray-800"
           >
             {currency.toLocaleString()}
+          </motion.span>
+        </motion.div>
+
+        <motion.div className="text-center" whileHover={{ scale: 1.05 }}>
+          <span className="block text-sm font-bold text-gray-600 mb-1">Capacity:</span>
+          <motion.span
+            key={feedingCapacityBonus}
+            initial={{ scale: 1.1, color: '#14b8a6' }}
+            animate={{ scale: 1, color: 'inherit' }}
+            transition={{ duration: 0.3 }}
+            className="text-2xl font-bold text-gray-800"
+          >
+            +{feedingCapacityBonus}
           </motion.span>
         </motion.div>
       </div>
