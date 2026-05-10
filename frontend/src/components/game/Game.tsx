@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { GameHeader } from './GameHeader';
 import { RestaurantArea } from './RestaurantArea';
 import { GameMessages } from './GameMessages';
@@ -14,12 +14,16 @@ import { useDishHandling } from '../../hooks/useDishHandling';
 import type { Customer } from '../../types/game';
 
 export const Game: React.FC = () => {
-  const { customers, config } = useGameStore();
+  const { customers, config, initBackendGame, loadError, lastMessage } = useGameStore();
   const maxCustomersBonus = useProgressionStore(state =>
     state.getPurchasedEffect('maxCustomersBonus', 0)
   );
   const [progressionPanelOpen, setProgressionPanelOpen] = useState(false);
   const maxCustomers = config.maxCustomers + Math.floor(maxCustomersBonus);
+
+  useEffect(() => {
+    void initBackendGame();
+  }, [initBackendGame]);
 
   // Custom hooks for game logic
   const { messages, showMessage } = useGameMessages();
@@ -67,6 +71,11 @@ export const Game: React.FC = () => {
       />
 
       <GameMessages messages={messages} />
+      {(loadError || lastMessage) && (
+        <div className="fixed bottom-4 left-4 z-40 max-w-sm rounded-lg bg-white/95 px-4 py-3 text-sm shadow-lg">
+          {loadError ?? lastMessage}
+        </div>
+      )}
 
       <ProgressionPanel
         isOpen={progressionPanelOpen}

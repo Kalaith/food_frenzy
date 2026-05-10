@@ -7,11 +7,11 @@ import type { DishType } from '../../types/game';
 interface CookingStationProps {
   color: string;
   dishType: DishType;
-  onDishReady: (color: string, dishName: string) => void;
+  onDishReady: (dishName: string) => void;
 }
 
 export const CookingStation: React.FC<CookingStationProps> = ({ color, dishType, onDishReady }) => {
-  const { addDish, removeDish: removeFromStore, getDishesForStation } = useGameStore();
+  const { cookDish, removeDish: removeFromStore, getDishesForStation } = useGameStore();
   const cookTimeMultiplier = useProgressionStore(state =>
     state.getPurchasedEffect('cookTimeMultiplier', 1)
   );
@@ -32,7 +32,7 @@ export const CookingStation: React.FC<CookingStationProps> = ({ color, dishType,
       setTimeLeft(prev => {
         if (prev <= 1) {
           clearInterval(timer);
-          finishCooking();
+          void finishCooking();
           return 0;
         }
         return prev - 1;
@@ -40,11 +40,10 @@ export const CookingStation: React.FC<CookingStationProps> = ({ color, dishType,
     }, 1000);
   };
 
-  const finishCooking = () => {
+  const finishCooking = async () => {
     setIsCooking(false);
-    const randomDish = dishType.examples[Math.floor(Math.random() * dishType.examples.length)];
-    addDish(color, randomDish);
-    onDishReady(color, randomDish);
+    const dishName = await cookDish(color);
+    onDishReady(dishName ?? dishType.name);
   };
 
   const handleRemoveDish = (index: number) => {

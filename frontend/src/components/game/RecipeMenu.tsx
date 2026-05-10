@@ -20,11 +20,11 @@ const RecipeMenu: React.FC<RecipeMenuProps> = ({ isOpen, onClose }) => {
       ([ingredient, amount]) => (ingredients[ingredient] || 0) >= amount
     );
 
-  const handleCraft = (recipeId: string) => {
+  const handleCraft = async (recipeId: string) => {
     const recipe = recipes.find(item => item.id === recipeId);
     if (!recipe) return;
 
-    if (craftRecipe(recipe)) {
+    if (await craftRecipe(recipe)) {
       const scoreGained = Math.floor(
         recipe.baseValue * recipe.profitMultiplier * getPurchasedEffect('recipeValueMultiplier', 1)
       );
@@ -156,7 +156,9 @@ const RecipeMenu: React.FC<RecipeMenuProps> = ({ isOpen, onClose }) => {
                                 currency, +{capacityBonus} future capacity
                               </div>
                               <button
-                                onClick={() => handleCraft(recipe.id)}
+                                onClick={() => {
+                                  void handleCraft(recipe.id);
+                                }}
                                 disabled={!canCraft}
                                 className={`w-full py-2 px-4 rounded transition-colors font-medium ${
                                   canCraft

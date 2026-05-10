@@ -1,28 +1,16 @@
-import { useState, useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { useGameStore } from '../stores/useGameStore';
-import { useGuestStore } from '../stores/useGuestStore';
-import { useProgressionStore } from '../stores/useProgressionStore';
-import { gameBalance } from '../constants/gameBalance';
 import { getCustomerDisplayName } from '../utils/customerDisplay';
 import type { Customer } from '../types/game';
 
 export const useVipInvitation = (showMessage: (message: string) => void) => {
   const [invitedCustomer, setInvitedCustomer] = useState<Customer | null>(null);
   const [showInviteModal, setShowInviteModal] = useState(false);
-
-  const {
-    removeCustomer,
-    addCombo,
-    addScore,
-    addToChain,
-    updateIngredients,
-    setSpecialTableBusy,
-    specialTableBusy,
-    chain,
-    canProcessCustomer,
-    config,
-  } = useGameStore();
-  const { addCurrency, recordProcessedCustomer, getPurchasedEffect } = useProgressionStore();
+  const specialTableBusy = useGameStore(state => state.specialTableBusy);
+  const canProcessCustomer = useGameStore(state => state.canProcessCustomer);
+  const processCustomer = useGameStore(state => state.processCustomer);
+  const setSpecialTableBusy = useGameStore(state => state.setSpecialTableBusy);
+  const config = useGameStore(state => state.config);
 
   const handleSpecialInvite = useCallback(
     (customer: Customer) => {
@@ -40,9 +28,7 @@ export const useVipInvitation = (showMessage: (message: string) => void) => {
 
       setInvitedCustomer(customer);
       setShowInviteModal(true);
-      showMessage(
-        `${getCustomerDisplayName(customer)} has been invited to our VIP dining experience! ✨`
-      );
+      showMessage(`${getCustomerDisplayName(customer)} has been invited to our VIP dining experience.`);
     },
     [canProcessCustomer, showMessage, specialTableBusy]
   );
@@ -50,85 +36,28 @@ export const useVipInvitation = (showMessage: (message: string) => void) => {
   const handleInviteAccept = useCallback(() => {
     if (!invitedCustomer) return;
 
-    // 85% chance of accepting (most customers are eager)
-    const willAccept = Math.random() < 0.85;
-
-    if (willAccept) {
-      const totalSatisfaction = Object.values(invitedCustomer.satisfaction).reduce(
-        (sum, val) => sum + val,
-        0
-      );
-      const yieldMultiplier = getPurchasedEffect('meatYieldMultiplier', 1);
-      const traitYieldMultiplier = invitedCustomer.type.specialTraits?.highYield ? 1.35 : 1;
-      const bonusMeat = invitedCustomer.type.specialTraits?.multipliesOnProcess ? 2 : 0;
-      const meatGained = Math.max(
-        1,
-        Math.floor(
-          (Math.floor(totalSatisfaction / 20) + Math.floor(invitedCustomer.deliciousness)) *
-            yieldMultiplier *
-            traitYieldMultiplier
-        ) + bonusMeat
-      );
-      const meatType = `${invitedCustomer.type.type}-meat`;
-      const nextChain = chain + 1;
-
+    void (async () => {
       setSpecialTableBusy(true);
-      useGuestStore.getState().recordGuestProcessed(invitedCustomer.guestId);
-      removeCustomer(invitedCustomer.id);
-      addCombo();
-      addToChain(invitedCustomer.id);
-      updateIngredients({
-        [meatType]: (useGameStore.getState().ingredients[meatType] || 0) + meatGained,
-      });
-
-      const points =
-        gameBalance.VIP_POINTS_PER_DELICIOUSNESS * invitedCustomer.deliciousness + meatGained * 10;
-      addScore(points);
-      addCurrency(Math.floor(points / 5));
-      recordProcessedCustomer(invitedCustomer.type.type, nextChain);
+      const accepted = await processCustomer(invitedCustomer.id);
       showMessage(
-        `${getCustomerDisplayName(invitedCustomer)} accepted the VIP invitation! Gained ${meatGained} ${meatType} and ${points} points!`
+        useGameStore.getState().lastMessage ??
+          (accepted
+            ? `${getCustomerDisplayName(invitedCustomer)} accepted the VIP invitation.`
+            : `${getCustomerDisplayName(invitedCustomer)} is not ready yet.`)
       );
-
-      if (invitedCustomer.type.specialTraits?.multipliesOnProcess) {
-        showMessage(
-          `${getCustomerDisplayName(invitedCustomer)}'s trait produced extra ingredients.`
-        );
-      }
-
       setTimeout(() => {
         setSpecialTableBusy(false);
       }, config.specialTableProcessTime);
-    } else {
-      showMessage(
-        `${getCustomerDisplayName(invitedCustomer)} got nervous and changed their mind. Try again later!`
-      );
-    }
+    })();
 
     setShowInviteModal(false);
     setInvitedCustomer(null);
-  }, [
-    invitedCustomer,
-    getPurchasedEffect,
-    chain,
-    config.specialTableProcessTime,
-    setSpecialTableBusy,
-    removeCustomer,
-    addCombo,
-    addToChain,
-    updateIngredients,
-    addScore,
-    addCurrency,
-    recordProcessedCustomer,
-    showMessage,
-  ]);
+  }, [config.specialTableProcessTime, invitedCustomer, processCustomer, setSpecialTableBusy, showMessage]);
 
   const handleInviteDecline = useCallback(() => {
     if (!invitedCustomer) return;
 
-    showMessage(
-      `${getCustomerDisplayName(invitedCustomer)} politely declined the invitation. Maybe next time!`
-    );
+    showMessage(`${getCustomerDisplayName(invitedCustomer)} politely declined the invitation.`);
     setShowInviteModal(false);
     setInvitedCustomer(null);
   }, [invitedCustomer, showMessage]);

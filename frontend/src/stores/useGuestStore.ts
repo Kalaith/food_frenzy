@@ -4,6 +4,7 @@ import type { GuestRecord } from '../types/game';
 
 interface GuestStore {
   guests: GuestRecord[];
+  applyBackendGuests: (guests: unknown[]) => void;
   createGuest: (name: string, customerType: string) => GuestRecord;
   recordGuestVisit: (guestId: string) => void;
   recordGuestFed: (guestId: string) => void;
@@ -25,6 +26,22 @@ export const useGuestStore = create<GuestStore>()(
   persist(
     (set, get) => ({
       guests: [],
+
+      applyBackendGuests: guests => {
+        set({
+          guests: guests
+            .filter((guest): guest is Record<string, unknown> => typeof guest === 'object' && guest !== null)
+            .map((guest): GuestRecord => ({
+              id: typeof guest.id === 'string' ? guest.id : 'guest',
+              name: typeof guest.name === 'string' ? guest.name : 'Guest',
+              customerType: typeof guest.customerType === 'string' ? guest.customerType : 'pig',
+              visits: typeof guest.visits === 'number' ? guest.visits : 0,
+              feedings: typeof guest.feedings === 'number' ? guest.feedings : 0,
+              processedCount: typeof guest.processedCount === 'number' ? guest.processedCount : 0,
+              lastSeenAt: typeof guest.lastSeenAt === 'number' ? guest.lastSeenAt : Date.now(),
+            })),
+        });
+      },
 
       createGuest: (name, customerType) => {
         const trimmedName = name.trim() || 'Guest';

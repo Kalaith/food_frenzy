@@ -1,9 +1,11 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { webhatcheryGameApi, type WebHatcheryGameState } from '../api/webhatcheryGameApi';
 import { gameBalance } from '../constants/gameBalance';
 import { customerTypes } from '../constants/gameData';
+import { useWebHatcherySessionStore } from './webhatcherySessionStore';
+import { useGuestStore } from './useGuestStore';
 import { useProgressionStore } from './useProgressionStore';
-import type { GameState, Customer, CustomerType, GameConfig, Recipe } from '../types/game';
+import type { Customer, CustomerType, GameConfig, GameState, Recipe } from '../types/game';
 
 const gameConfig: GameConfig = {
   maxCustomers: gameBalance.MAX_CUSTOMERS,
@@ -15,8 +17,26 @@ const gameConfig: GameConfig = {
   specialTableProcessTime: 3000,
 };
 
+interface BackendState {
+  game?: Partial<GameState>;
+  progression?: Record<string, unknown>;
+  guests?: unknown[];
+  lastMessage?: string;
+}
+
 interface GameStore extends GameState {
-  // Actions
+  loadError: string | null;
+  lastMessage: string | null;
+  initBackendGame: () => Promise<void>;
+  spawnCustomer: () => Promise<void>;
+  customerLeft: (customerId: number) => Promise<void>;
+  satisfactionDecayTick: () => Promise<void>;
+  traitTick: () => Promise<void>;
+  cookDish: (stationColor: string) => Promise<string | null>;
+  serveDish: (customerId: number, dishColor: string, dishName: string, dishIndex: number) => Promise<void>;
+  processCustomer: (customerId: number) => Promise<boolean>;
+  setSpecialTableBusy: (busy: boolean) => void;
+
   addScore: (points: number, options?: { applyCombo?: boolean }) => void;
   addCombo: () => void;
   resetCombo: () => void;
@@ -24,22 +44,15 @@ interface GameStore extends GameState {
   addCustomer: (customer: Customer) => void;
   removeCustomer: (customerId: number) => void;
   updateCustomer: (customerId: number, updates: Partial<Customer>) => void;
-  setSpecialTableBusy: (busy: boolean) => void;
   updateIngredients: (ingredients: Record<string, number>) => void;
   spendIngredients: (ingredients: Record<string, number>) => boolean;
-  craftRecipe: (recipe: Recipe) => boolean;
+  craftRecipe: (recipe: Recipe) => Promise<boolean>;
   resetGame: () => void;
-
-  // Dish management
   addDish: (stationColor: string, dishName: string) => void;
   removeDish: (stationColor: string, dishIndex: number) => void;
   getDishesForStation: (stationColor: string) => string[];
-
-  // Getters
   getCustomerById: (id: number) => Customer | undefined;
   canProcessCustomer: (customer: Customer) => boolean;
-
-  // Config
   config: GameConfig;
   customerTypes: CustomerType[];
 }
@@ -49,7 +62,7 @@ const initialState: GameState = {
   combo: 0,
   chain: 0,
   customers: [],
-  ingredients: { regular: Infinity },
+  ingredients: { regular: Number.MAX_SAFE_INTEGER },
   cookingTimers: {},
   specialTableBusy: false,
   chainHistory: [],
@@ -57,145 +70,161 @@ const initialState: GameState = {
   dishesReady: {},
 };
 
-export const useGameStore = create<GameStore>()(
-  persist(
-    (set, get) => ({
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+const asBackendState = (gameState: WebHatcheryGameState): BackendState => {
+  const state = gameState.save.state;
+  return isRecord(state) ? state : {};
+};
+
+const syncSessionState = (gameState: WebHatcheryGameState): void => {
+  useWebHatcherySessionStore.setState({
+    gameState,
+    user: gameState.user,
+    isLoading: false,
+    error: null,
+  });
+};
+
+const loadOrCreateBackendGame = async (): Promise<WebHatcheryGameState> => {
+  const sessionStore = useWebHatcherySessionStore.getState();
+  try {
+    return await sessionStore.loadGame();
+  } catch {
+    return sessionStore.continueAsGuest();
+  }
+};
+
+const errorMessage = (error: unknown, fallback: string): string =>
+  error instanceof Error ? error.message : fallback;
+
+export const useGameStore = create<GameStore>()((set, get) => {
+  const applyBackendState = (gameState: WebHatcheryGameState): BackendState => {
+    syncSessionState(gameState);
+    const backendState = asBackendState(gameState);
+    const game = isRecord(backendState.game) ? backendState.game : {};
+    const progression = isRecord(backendState.progression) ? backendState.progression : null;
+    const guests = Array.isArray(backendState.guests) ? backendState.guests : [];
+
+    set({
       ...initialState,
-      config: gameConfig,
-      customerTypes,
+      ...game,
+      loadError: null,
+      lastMessage: typeof backendState.lastMessage === 'string' ? backendState.lastMessage : null,
+    });
 
-      addScore: (points, options) =>
-        set(state => {
-          const progression = useProgressionStore.getState();
-          const comboBoost = progression.getPurchasedEffect('comboMultiplier', 1);
-          const prestigeMultiplier = 1 + progression.prestigePoints * 0.03;
-          const comboMultiplier =
-            options?.applyCombo === false ? 1 : 1 + state.combo * 0.1 * comboBoost;
-          const scoredPoints = Math.floor(points * comboMultiplier * prestigeMultiplier);
-          progression.recordScore(scoredPoints);
-
-          return {
-            score: state.score + scoredPoints,
-          };
-        }),
-
-      addCombo: () => set(state => ({ combo: state.combo + 1 })),
-
-      resetCombo: () => set({ combo: 0 }),
-
-      addToChain: customerId =>
-        set(state => ({
-          chainHistory: [...state.chainHistory, customerId],
-          chain: state.chainHistory.length + 1,
-        })),
-
-      addCustomer: customer =>
-        set(state => ({
-          customers: [...state.customers, customer],
-        })),
-
-      removeCustomer: customerId =>
-        set(state => ({
-          customers: state.customers.filter(c => c.id !== customerId),
-        })),
-
-      updateCustomer: (customerId, updates) =>
-        set(state => ({
-          customers: state.customers.map(c => (c.id === customerId ? { ...c, ...updates } : c)),
-        })),
-
-      setSpecialTableBusy: busy => set({ specialTableBusy: busy }),
-
-      updateIngredients: newIngredients =>
-        set(state => ({
-          ingredients: { ...state.ingredients, ...newIngredients },
-        })),
-
-      spendIngredients: ingredients => {
-        const state = get();
-        const hasIngredients = Object.entries(ingredients).every(
-          ([ingredient, amount]) => (state.ingredients[ingredient] || 0) >= amount
-        );
-
-        if (!hasIngredients) {
-          return false;
-        }
-
-        set({
-          ingredients: Object.entries(ingredients).reduce(
-            (nextIngredients, [ingredient, amount]) => ({
-              ...nextIngredients,
-              [ingredient]: nextIngredients[ingredient] - amount,
-            }),
-            { ...state.ingredients }
-          ),
-        });
-
-        return true;
-      },
-
-      craftRecipe: recipe => {
-        if (!recipe.unlocked || !get().spendIngredients(recipe.ingredients)) {
-          return false;
-        }
-
-        const progression = useProgressionStore.getState();
-        const recipeValueMultiplier = progression.getPurchasedEffect('recipeValueMultiplier', 1);
-        const capacityGainMultiplier = progression.getPurchasedEffect('capacityGainMultiplier', 1);
-        const scoreGained = Math.floor(
-          recipe.baseValue * recipe.profitMultiplier * recipeValueMultiplier
-        );
-        get().addScore(scoreGained, { applyCombo: false });
-
-        progression.addCurrency(Math.floor(scoreGained / 4));
-        progression.recordCraftedRecipe(
-          recipe.id,
-          Math.max(1, Math.floor(recipe.capacityBonus * capacityGainMultiplier))
-        );
-
-        return true;
-      },
-
-      resetGame: () => set(initialState),
-
-      // Dish management
-      addDish: (stationColor, dishName) =>
-        set(state => ({
-          dishesReady: {
-            ...state.dishesReady,
-            [stationColor]: [...(state.dishesReady[stationColor] || []), dishName],
-          },
-        })),
-
-      removeDish: (stationColor, dishIndex) =>
-        set(state => ({
-          dishesReady: {
-            ...state.dishesReady,
-            [stationColor]: (state.dishesReady[stationColor] || []).filter(
-              (_, i) => i !== dishIndex
-            ),
-          },
-        })),
-
-      getDishesForStation: stationColor => get().dishesReady[stationColor] || [],
-
-      getCustomerById: id => get().customers.find(c => c.id === id),
-
-      canProcessCustomer: customer => {
-        return (
-          customer.deliciousness >= gameBalance.VIP_DELICIOUSNESS_THRESHOLD &&
-          customer.totalSatisfaction > gameBalance.VIP_SATISFACTION_THRESHOLD
-        );
-      },
-    }),
-    {
-      name: 'feast-frenzy-game',
-      partialize: state => ({
-        score: state.score,
-        ingredients: state.ingredients,
-        nextCustomerId: state.nextCustomerId,
-        dishesReady: state.dishesReady,
-      }),
+    if (progression) {
+      useProgressionStore.getState().applyBackendProgression(progression);
     }
-  )
-);
+    useGuestStore.getState().applyBackendGuests(guests);
+    return backendState;
+  };
+
+  const runIntent = async (intent: string, payload: Record<string, unknown> = {}): Promise<BackendState> => {
+    const gameState = await webhatcheryGameApi.applyIntent(intent, payload);
+    return applyBackendState(gameState);
+  };
+
+  return {
+    ...initialState,
+    loadError: null,
+    lastMessage: null,
+    config: gameConfig,
+    customerTypes,
+
+    initBackendGame: async () => {
+      try {
+        set({ loadError: null });
+        applyBackendState(await loadOrCreateBackendGame());
+      } catch (error) {
+        set({ loadError: errorMessage(error, 'Unable to load game state.') });
+      }
+    },
+
+    spawnCustomer: async () => {
+      await runIntent('spawn_customer');
+    },
+
+    customerLeft: async (customerId) => {
+      await runIntent('customer_left', { customerId });
+    },
+
+    satisfactionDecayTick: async () => {
+      await runIntent('satisfaction_decay_tick');
+    },
+
+    traitTick: async () => {
+      await runIntent('trait_tick');
+    },
+
+    cookDish: async (stationColor) => {
+      const before = get().getDishesForStation(stationColor).length;
+      const backendState = await runIntent('cook_dish', { stationColor });
+      const game = isRecord(backendState.game) ? backendState.game : {};
+      const dishesReady = isRecord(game.dishesReady) ? game.dishesReady : {};
+      const dishes = Array.isArray(dishesReady[stationColor])
+        ? dishesReady[stationColor].filter((dish): dish is string => typeof dish === 'string')
+        : [];
+      return dishes[before] ?? dishes[dishes.length - 1] ?? null;
+    },
+
+    serveDish: async (customerId, dishColor, dishName, dishIndex) => {
+      await runIntent('serve_dish', { customerId, dishColor, dishName, dishIndex });
+    },
+
+    processCustomer: async (customerId) => {
+      try {
+        await runIntent('process_customer', { customerId });
+        return true;
+      } catch (error) {
+        set({ lastMessage: errorMessage(error, 'Unable to process customer.') });
+        return false;
+      }
+    },
+
+    setSpecialTableBusy: (busy) => {
+      set({ specialTableBusy: busy });
+      void runIntent('set_special_table_busy', { busy }).catch(error => {
+        set({ lastMessage: errorMessage(error, 'Unable to update VIP table.') });
+      });
+    },
+
+    addScore: () => undefined,
+    addCombo: () => undefined,
+    resetCombo: () => undefined,
+    addToChain: () => undefined,
+    addCustomer: () => {
+      void runIntent('spawn_customer').catch(error => set({ lastMessage: errorMessage(error, 'Unable to add customer.') }));
+    },
+    removeCustomer: (customerId) => {
+      void runIntent('customer_left', { customerId }).catch(error => set({ lastMessage: errorMessage(error, 'Unable to remove customer.') }));
+    },
+    updateCustomer: () => undefined,
+    updateIngredients: () => undefined,
+    spendIngredients: () => false,
+    craftRecipe: async (recipe) => {
+      try {
+        await runIntent('craft_recipe', { recipeId: recipe.id });
+        return true;
+      } catch (error) {
+        set({ lastMessage: errorMessage(error, 'Unable to craft recipe.') });
+        return false;
+      }
+    },
+    resetGame: () => {
+      void runIntent('reset_game').catch(error => set({ lastMessage: errorMessage(error, 'Unable to reset game.') }));
+    },
+    addDish: (stationColor) => {
+      void runIntent('cook_dish', { stationColor }).catch(error => set({ lastMessage: errorMessage(error, 'Unable to cook dish.') }));
+    },
+    removeDish: (stationColor, dishIndex) => {
+      void runIntent('remove_dish', { stationColor, dishIndex }).catch(error => set({ lastMessage: errorMessage(error, 'Unable to remove dish.') }));
+    },
+    getDishesForStation: stationColor => get().dishesReady[stationColor] || [],
+    getCustomerById: id => get().customers.find(c => c.id === id),
+    canProcessCustomer: customer =>
+      customer.deliciousness >= gameBalance.VIP_DELICIOUSNESS_THRESHOLD &&
+      customer.totalSatisfaction > gameBalance.VIP_SATISFACTION_THRESHOLD,
+  };
+});

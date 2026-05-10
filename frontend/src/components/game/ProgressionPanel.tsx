@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useProgressionStore } from '../../stores/useProgressionStore';
-import { useGameStore } from '../../stores/useGameStore';
 import UpgradeShop from './UpgradeShop';
 import RecipeMenu from './RecipeMenu';
 import AchievementDisplay from './AchievementDisplay';
@@ -24,7 +23,6 @@ const ProgressionPanel: React.FC<ProgressionPanelProps> = ({ isOpen, onToggle })
     getPrestigeReward,
     prestige,
   } = useProgressionStore();
-  const { resetGame } = useGameStore();
   const [activeModal, setActiveModal] = useState<'upgrades' | 'recipes' | 'achievements' | null>(
     null
   );
@@ -50,8 +48,7 @@ const ProgressionPanel: React.FC<ProgressionPanelProps> = ({ isOpen, onToggle })
   const handlePrestige = () => {
     if (!prestigeReady) return;
 
-    prestige();
-    resetGame();
+    void prestige();
   };
 
   return (

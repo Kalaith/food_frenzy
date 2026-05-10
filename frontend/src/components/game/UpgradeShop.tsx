@@ -11,11 +11,11 @@ interface UpgradeShopProps {
 const UpgradeShop: React.FC<UpgradeShopProps> = ({ isOpen, onClose }) => {
   const { upgrades, currency, purchaseUpgrade, getUpgradeCost } = useProgressionStore();
 
-  const handlePurchase = (upgrade: Upgrade) => {
+  const handlePurchase = async (upgrade: Upgrade) => {
     const level = upgrade.level ?? 0;
     const maxLevel = upgrade.maxLevel || 1;
     if (currency >= getUpgradeCost(upgrade.id) && level < maxLevel) {
-      purchaseUpgrade(upgrade.id);
+      await purchaseUpgrade(upgrade.id);
     }
   };
 
@@ -134,7 +134,9 @@ const UpgradeShop: React.FC<UpgradeShopProps> = ({ isOpen, onClose }) => {
                     </div>
                     {!isMaxed && (
                       <button
-                        onClick={() => handlePurchase(upgrade)}
+                        onClick={() => {
+                          void handlePurchase(upgrade);
+                        }}
                         disabled={currency < upgradeCost}
                         className={`px-4 py-2 rounded font-medium transition-colors ${
                           currency >= upgradeCost

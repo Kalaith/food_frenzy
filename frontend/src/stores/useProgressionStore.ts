@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { webhatcheryGameApi, type WebHatcheryGameState } from '../api/webhatcheryGameApi';
 import { gameBalance } from '../constants/gameBalance';
+import { useWebHatcherySessionStore } from './webhatcherySessionStore';
 import type { MetaProgression, Upgrade, Recipe, Achievement } from '../types/game';
 
 export const initialUpgrades: Upgrade[] = [
@@ -315,10 +317,11 @@ const initialState: MetaProgression = {
 };
 
 interface ProgressionStore extends MetaProgression {
+  applyBackendProgression: (progression: Record<string, unknown>) => void;
   // Actions
   addCurrency: (amount: number) => void;
   spendCurrency: (amount: number) => boolean;
-  purchaseUpgrade: (upgradeId: string) => boolean;
+  purchaseUpgrade: (upgradeId: string) => Promise<boolean>;
   unlockRecipe: (recipeId: string) => void;
   updateAchievement: (achievementId: string, progress: number) => void;
   recordScore: (amount: number) => void;
@@ -326,8 +329,8 @@ interface ProgressionStore extends MetaProgression {
   recordProcessedCustomer: (customerType: string, chainLength: number) => void;
   recordCraftedRecipe: (recipeId: string, capacityBonus: number) => void;
   recordCustomerLost: () => void;
-  prestige: () => void;
-  resetProgress: () => void;
+  prestige: () => Promise<boolean>;
+  resetProgress: () => Promise<void>;
 
   // Getters
   getUpgrade: (id: string) => Upgrade | undefined;
@@ -355,10 +358,63 @@ const withAchievementProgress = (
       : achievement
   );
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+const syncSessionState = (gameState: WebHatcheryGameState): void => {
+  useWebHatcherySessionStore.setState({
+    gameState,
+    user: gameState.user,
+    isLoading: false,
+    error: null,
+  });
+};
+
+const extractProgression = (gameState: WebHatcheryGameState): Record<string, unknown> | null => {
+  const state = gameState.save.state;
+  if (!isRecord(state) || !isRecord(state.progression)) {
+    return null;
+  }
+
+  return state.progression;
+};
+
 export const useProgressionStore = create<ProgressionStore>()(
   persist(
     (set, get) => ({
       ...initialState,
+
+      applyBackendProgression: progression => {
+        set({
+          currency: typeof progression.currency === 'number' ? progression.currency : 0,
+          upgrades: Array.isArray(progression.upgrades) ? (progression.upgrades as Upgrade[]) : initialUpgrades,
+          recipes: Array.isArray(progression.recipes) ? (progression.recipes as Recipe[]) : initialRecipes,
+          achievements: Array.isArray(progression.achievements)
+            ? (progression.achievements as Achievement[])
+            : initialAchievements,
+          prestigeLevel: typeof progression.prestigeLevel === 'number' ? progression.prestigeLevel : 0,
+          prestigePoints: typeof progression.prestigePoints === 'number' ? progression.prestigePoints : 0,
+          totalScore: typeof progression.totalScore === 'number' ? progression.totalScore : 0,
+          processedCustomerCounts: isRecord(progression.processedCustomerCounts)
+            ? (progression.processedCustomerCounts as Record<string, number>)
+            : {},
+          processedCustomerTypes: Array.isArray(progression.processedCustomerTypes)
+            ? progression.processedCustomerTypes.filter((type): type is string => typeof type === 'string')
+            : [],
+          feedingCapacityBonus:
+            typeof progression.feedingCapacityBonus === 'number' ? progression.feedingCapacityBonus : 0,
+          craftedRecipeCounts: isRecord(progression.craftedRecipeCounts)
+            ? (progression.craftedRecipeCounts as Record<string, number>)
+            : {},
+          totalDishesServed:
+            typeof progression.totalDishesServed === 'number' ? progression.totalDishesServed : 0,
+          preferredDishesServed:
+            typeof progression.preferredDishesServed === 'number' ? progression.preferredDishesServed : 0,
+          overfedCustomerCount:
+            typeof progression.overfedCustomerCount === 'number' ? progression.overfedCustomerCount : 0,
+          customersLost: typeof progression.customersLost === 'number' ? progression.customersLost : 0,
+        });
+      },
 
       addCurrency: amount =>
         set(state => ({
@@ -374,7 +430,21 @@ export const useProgressionStore = create<ProgressionStore>()(
         return false;
       },
 
-      purchaseUpgrade: upgradeId => {
+      purchaseUpgrade: async upgradeId => {
+        try {
+          const gameState = await webhatcheryGameApi.applyIntent('purchase_upgrade', { upgradeId });
+          syncSessionState(gameState);
+          const progression = extractProgression(gameState);
+          if (progression) {
+            get().applyBackendProgression(progression);
+          }
+          return true;
+        } catch {
+          return false;
+        }
+      },
+
+      purchaseUpgradeLocal: (upgradeId: string) => {
         const state = get();
         const upgrade = state.upgrades.find(u => u.id === upgradeId);
         const currentLevel = upgrade?.level ?? (upgrade?.purchased ? upgrade.maxLevel || 1 : 0);
@@ -553,31 +623,28 @@ export const useProgressionStore = create<ProgressionStore>()(
           customersLost: state.customersLost + 1,
         })),
 
-      prestige: () => {
-        const state = get();
-        if (!state.canPrestige()) return;
-
-        const prestigeBonus = state.getPrestigeReward();
-        set({
-          prestigeLevel: state.prestigeLevel + 1,
-          currency: state.currency + prestigeBonus,
-          prestigePoints: state.prestigePoints + prestigeBonus,
-          upgrades: initialUpgrades,
-          recipes: initialRecipes,
-          achievements: withAchievementProgress(initialAchievements, 'fresh-start', 1),
-          totalScore: 0,
-          processedCustomerCounts: {},
-          processedCustomerTypes: [],
-          feedingCapacityBonus: 0,
-          craftedRecipeCounts: {},
-          totalDishesServed: 0,
-          preferredDishesServed: 0,
-          overfedCustomerCount: 0,
-          customersLost: 0,
-        });
+      prestige: async () => {
+        try {
+          const gameState = await webhatcheryGameApi.applyIntent('prestige');
+          syncSessionState(gameState);
+          const progression = extractProgression(gameState);
+          if (progression) {
+            get().applyBackendProgression(progression);
+          }
+          return true;
+        } catch {
+          return false;
+        }
       },
 
-      resetProgress: () => set(initialState),
+      resetProgress: async () => {
+        const gameState = await webhatcheryGameApi.applyIntent('reset_progress');
+        syncSessionState(gameState);
+        const progression = extractProgression(gameState);
+        if (progression) {
+          get().applyBackendProgression(progression);
+        }
+      },
 
       getUpgrade: id => get().upgrades.find(u => u.id === id),
       getRecipe: id => get().recipes.find(r => r.id === id),
